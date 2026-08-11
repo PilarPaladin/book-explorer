@@ -2,6 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { searchBooks, getPopularBooks } from './services/api';
 import { EyeIcon, HeartIcon, BookmarkIcon, EllipsisHorizontalIcon, ClockIcon, StarIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import { EyeIcon as EyeSolid, HeartIcon as HeartSolid, BookmarkIcon as BookmarkSolid, ClockIcon as ClockSolid, StarIcon as StarSolid } from '@heroicons/react/24/solid';
+import Bookmarks from './pages/Bookmarks';
+import Readlist from './pages/Readlist';
+import Journal from './pages/Journal';
+import About from './pages/About';
+import Sidebar from './components/Sidebar';
 
 // Props demonstration: BookCard component
 function BookCard({ book, onClick }) {
@@ -11,14 +16,19 @@ function BookCard({ book, onClick }) {
   // Open Library API returns cover_i, title, author_name, first_publish_year
   const coverUrl = book.cover_i
     ? `https://covers.openlibrary.org/b/id/${book.cover_i}-M.jpg`
-    : 'https://via.placeholder.com/150x220?text=No+Cover';
+    : '/tempCover.png';
 
   const author = book.author_name ? `by ${book.author_name[0]}` : 'Unknown Author';
 
   return (
     <div className="book-card" onClick={() => onClick(book)} style={{ cursor: 'pointer' }}>
       <div className="book-cover-container">
-        <img src={coverUrl} alt={book.title} className="book-cover" />
+        <img
+          src={coverUrl}
+          alt={book.title}
+          className="book-cover"
+          onError={(e) => { e.target.onerror = null; e.target.src = '/tempCover.png'; }}
+        />
 
         <div className="book-ribbon" onClick={(e) => e.stopPropagation()}>
           <span className="action-icon dark-icon" title="More options" onClick={() => onClick(book)} style={{ marginBottom: '-7px' }} >
@@ -74,7 +84,7 @@ function StarRating({ rating, setRating }) {
 
   return (
     <div
-      style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
+      style={{ display: 'flex', alignItems: 'center', position: 'relative' }}
       onMouseEnter={() => setIsHovering(true)}
       onMouseLeave={() => { setIsHovering(false); setHoverValue(null); }}
     >
@@ -83,7 +93,8 @@ function StarRating({ rating, setRating }) {
         style={{
           background: 'none', border: 'none', cursor: 'pointer', padding: 0,
           opacity: isHovering ? 1 : 0, transition: 'opacity 0.2s ease',
-          display: 'flex', alignItems: 'center', justifyContent: 'center'
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          position: 'absolute', right: '100%', marginRight: '10px'
         }}
         title="Clear rating"
       >
@@ -127,6 +138,18 @@ function BookModal({ book, onClose }) {
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [inReadlist, setInReadlist] = useState(false);
   const [rating, setRating] = useState(0);
+  const [hoverBookmark, setHoverBookmark] = useState(false);
+  const [hoverReadlist, setHoverReadlist] = useState(false);
+
+  useEffect(() => {
+    const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+    document.body.style.overflow = 'hidden';
+    document.body.style.paddingRight = `${scrollbarWidth}px`;
+    return () => {
+      document.body.style.overflow = 'unset';
+      document.body.style.paddingRight = '0px';
+    };
+  }, []);
 
   useEffect(() => {
     setImgLoaded(false);
@@ -142,7 +165,7 @@ function BookModal({ book, onClose }) {
 
   const coverUrl = book.cover_i
     ? `https://covers.openlibrary.org/b/id/${book.cover_i}-L.jpg`
-    : 'https://via.placeholder.com/300x450?text=No+Cover';
+    : '/tempCover.png';
 
   return (
     <div style={{
@@ -174,6 +197,7 @@ function BookModal({ book, onClose }) {
             src={coverUrl}
             alt={book.title}
             onLoad={() => setImgLoaded(true)}
+            onError={(e) => { e.target.onerror = null; e.target.src = '/tempCover.png'; setImgLoaded(true); }}
             style={{
               width: '100%',
               objectFit: 'contain',
@@ -201,25 +225,37 @@ function BookModal({ book, onClose }) {
           </div>
 
           {/* Center Section: Actions Grid & Rating */}
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', alignSelf: 'flex-start', marginTop: '50px', gap: '30px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', alignSelf: 'center', marginTop: '50px', gap: '30px' }}>
 
             {/* Actions 2x2 Grid */}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '25px 60px', justifyItems: 'start' }}>
-              <button onClick={() => setIsLoved(!isLoved)} className="inter-regular" style={{ display: 'flex', alignItems: 'center', gap: '10px', background: 'none', border: 'none', cursor: 'pointer', fontSize: '22px', color: 'var(--color-dark)', padding: 0 }}>
+              <button onClick={() => setIsLoved(!isLoved)} className="inter-regular" style={{ width: '180px', justifyContent: 'flex-start', display: 'flex', alignItems: 'center', gap: '10px', background: 'none', border: 'none', cursor: 'pointer', fontSize: '22px', color: 'var(--color-dark)', padding: 0 }}>
                 {isLoved ? <HeartSolid style={{ width: '32px', color: '#990000' }} /> : <HeartIcon style={{ width: '32px' }} />}
-                Love
+                {isLoved ? 'Loved' : 'Love'}
               </button>
-              <button onClick={() => setIsBookmarked(!isBookmarked)} className="inter-regular" style={{ display: 'flex', alignItems: 'center', gap: '10px', background: 'none', border: 'none', cursor: 'pointer', fontSize: '22px', color: 'var(--color-dark)', padding: 0 }}>
+              <button
+                onClick={() => setIsBookmarked(!isBookmarked)}
+                onMouseEnter={() => setHoverBookmark(true)}
+                onMouseLeave={() => setHoverBookmark(false)}
+                className="inter-regular"
+                style={{ width: '180px', justifyContent: 'flex-start', display: 'flex', alignItems: 'center', gap: '10px', background: 'none', border: 'none', cursor: 'pointer', fontSize: '22px', color: 'var(--color-dark)', padding: 0 }}
+              >
                 {isBookmarked ? <BookmarkSolid style={{ width: '32px', color: '#d4af37' }} /> : <BookmarkIcon style={{ width: '32px' }} />}
-                Bookmark
+                {isBookmarked ? (hoverBookmark ? 'Remove' : 'Bookmarked') : 'Bookmark'}
               </button>
-              <button onClick={() => setIsRead(!isRead)} className="inter-regular" style={{ display: 'flex', alignItems: 'center', gap: '10px', background: 'none', border: 'none', cursor: 'pointer', fontSize: '22px', color: 'var(--color-dark)', padding: 0 }}>
+              <button onClick={() => setIsRead(!isRead)} className="inter-regular" style={{ width: '180px', justifyContent: 'flex-start', display: 'flex', alignItems: 'center', gap: '10px', background: 'none', border: 'none', cursor: 'pointer', fontSize: '22px', color: 'var(--color-dark)', padding: 0 }}>
                 {isRead ? <EyeSolid style={{ width: '32px', color: '#3a9d46' }} /> : <EyeIcon style={{ width: '32px' }} />}
                 {isRead ? 'Finished' : 'Unfinished'}
               </button>
-              <button onClick={() => setInReadlist(!inReadlist)} className="inter-regular" style={{ display: 'flex', alignItems: 'center', gap: '10px', background: 'none', border: 'none', cursor: 'pointer', fontSize: '22px', color: 'var(--color-dark)', padding: 0 }}>
+              <button
+                onClick={() => setInReadlist(!inReadlist)}
+                onMouseEnter={() => setHoverReadlist(true)}
+                onMouseLeave={() => setHoverReadlist(false)}
+                className="inter-regular"
+                style={{ width: '180px', justifyContent: 'flex-start', display: 'flex', alignItems: 'center', gap: '10px', background: 'none', border: 'none', cursor: 'pointer', fontSize: '22px', color: 'var(--color-dark)', padding: 0 }}
+              >
                 {inReadlist ? <ClockSolid style={{ width: '32px', color: '#3f7dbe' }} /> : <ClockIcon style={{ width: '32px' }} />}
-                Readlist
+                {inReadlist ? (hoverReadlist ? 'Remove' : 'Readlist') : 'Readlist'}
               </button>
             </div>
 
@@ -236,10 +272,115 @@ function BookModal({ book, onClose }) {
   );
 }
 
+function LogModal({ onClose }) {
+  const [query, setQuery] = useState('');
+  const [results, setResults] = useState([]);
+  const [isSearching, setIsSearching] = useState(false);
+
+  useEffect(() => {
+    const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+    document.body.style.overflow = 'hidden';
+    document.body.style.paddingRight = `${scrollbarWidth}px`;
+    return () => {
+      document.body.style.overflow = 'unset';
+      document.body.style.paddingRight = '0px';
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!query.trim()) {
+      setResults([]);
+      setIsSearching(false);
+      return;
+    }
+    const fetchResults = async () => {
+      setIsSearching(true);
+      try {
+        const data = await searchBooks(query);
+        setResults(data || []);
+      } catch (e) {
+        setResults([]);
+      }
+      setIsSearching(false);
+    };
+
+    const delayDebounceFn = setTimeout(() => {
+      fetchResults();
+    }, 300);
+
+    return () => clearTimeout(delayDebounceFn);
+  }, [query]);
+
+  return (
+    <div style={{
+      position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+      backgroundColor: 'rgba(0,0,0,0.7)', display: 'flex',
+      justifyContent: 'center', alignItems: 'center', zIndex: 2000
+    }} onClick={onClose}>
+      <div style={{
+        backgroundColor: 'var(--color-white)', borderRadius: '6px', width: '600px',
+        boxShadow: '0 10px 30px rgba(0,0,0,0.3)'
+      }} onClick={e => e.stopPropagation()}>
+
+        {/* Header */}
+        <div style={{ padding: '15px 20px', borderBottom: '1px solid var(--color-gray)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#f3f4f6', borderTopLeftRadius: '6px', borderTopRightRadius: '6px' }}>
+          <h3 className="inter-bold" style={{ margin: 0, color: 'var(--color-dark)', fontSize: '16px' }}>Add to your books...</h3>
+          <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
+            <XMarkIcon style={{ width: '20px', color: 'var(--color-dark)' }} />
+          </button>
+        </div>
+
+        {/* Body */}
+        <div style={{ padding: '60px 40px', display: 'flex', flexDirection: 'column', backgroundColor: 'var(--color-white)', borderBottomLeftRadius: '6px', borderBottomRightRadius: '6px' }}>
+          <div style={{ position: 'relative' }}>
+            <input
+              type="text"
+              placeholder="Search for book..."
+              className="inter-regular"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              style={{ boxSizing: 'border-box', width: '100%', padding: '12px 15px', fontSize: '16px', borderRadius: '4px', border: '1px solid var(--color-gray)', outline: 'none' }}
+            />
+            {/* Dropdown Results */}
+            {(results.length > 0 || isSearching) && query.trim() !== '' && (
+              <div style={{
+                position: 'absolute', top: '100%', left: 0, right: 0,
+                backgroundColor: 'var(--color-white)', border: '1px solid var(--color-gray)',
+                borderTop: 'none', borderRadius: '0 0 4px 4px', zIndex: 10,
+                boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
+                maxHeight: '300px', overflowY: 'auto'
+              }}>
+                {isSearching && results.length === 0 ? (
+                  <div style={{ padding: '10px 15px', color: 'var(--color-gray)', fontSize: '14px' }}>Searching...</div>
+                ) : (
+                  results.map((book) => (
+                    <div key={book.key} className="log-search-item inter-regular" onClick={() => onClose()}>
+                      <strong>{book.title}</strong>
+                      {book.first_publish_year && <span style={{ opacity: 0.8, marginLeft: '6px' }}>({book.first_publish_year})</span>}
+                      {book.author_name && <span style={{ opacity: 0.6, marginLeft: '6px' }}>by {book.author_name[0]}</span>}
+                    </div>
+                  ))
+                )}
+                {!isSearching && results.length === 0 && (
+                  <div style={{ padding: '10px 15px', color: 'var(--color-gray)', fontSize: '14px' }}>No matches found.</div>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+
+      </div>
+    </div>
+  );
+}
+
 function App() {
+  const [currentPage, setCurrentPage] = useState('home');
+  const [isLogModalOpen, setIsLogModalOpen] = useState(false);
   const [books, setBooks] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [displayedQuery, setDisplayedQuery] = useState('');
   const [selectedBook, setSelectedBook] = useState(null);
 
   useEffect(() => {
@@ -261,6 +402,7 @@ function App() {
     if (!searchQuery.trim()) return;
 
     setIsLoading(true);
+    setDisplayedQuery(searchQuery);
     try {
       const results = await searchBooks(searchQuery);
       setBooks(results || []);
@@ -274,121 +416,88 @@ function App() {
   return (
     <div className="app-container">
       <header className="header">
-        <div className="header-left">
+        <div className="header-left" onClick={() => setCurrentPage('home')} style={{ cursor: 'pointer' }}>
           <img src="/logo.png" alt="Logo" className="logo" />
           <h1 className="brand-name rakkas-regular">myArkived</h1>
         </div>
-        <nav className="header-nav inter-bold">
-          <a href="#" className="nav-link">Bookmarks</a>
-          <a href="#" className="nav-link">Readlists</a>
-          <a href="#" className="nav-link">About</a>
+        <nav className="header-nav inter-bold" style={{ display: 'flex', alignItems: 'center', gap: '25px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+            <a href="#" className="nav-link" onClick={(e) => { e.preventDefault(); setCurrentPage('bookmarks'); }}>Bookmarks</a>
+            <a href="#" className="nav-link" onClick={(e) => { e.preventDefault(); setCurrentPage('readlist'); }}>Readlist</a>
+            <a href="#" className="nav-link" onClick={(e) => { e.preventDefault(); setCurrentPage('journal'); }}>Journal</a>
+            <a href="#" className="nav-link" onClick={(e) => { e.preventDefault(); setCurrentPage('about'); }}>About</a>
+          </div>
+
+          <form className="search-container" onSubmit={handleSearch} style={{ margin: 0, height: '36px', display: 'flex' }}>
+            <input
+              type="text"
+              placeholder="Search books..."
+              className="search-input inter-regular"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              style={{ padding: '0 15px', height: '100%', fontSize: '14px', width: '200px' }}
+            />
+            <button type="submit" className="search-button inter-bold" style={{ padding: '0 15px', height: '100%', fontSize: '14px' }}>Search</button>
+          </form>
+
+          <button className="inter-bold" onClick={() => setIsLogModalOpen(true)} style={{
+            backgroundColor: '#3f7dbe', color: 'white', border: 'none',
+            borderRadius: '4px', padding: '8px 16px', fontSize: '15px', cursor: 'pointer',
+            display: 'flex', alignItems: 'center', gap: '5px'
+          }}>
+            + LOG
+          </button>
         </nav>
       </header>
 
       <main className="main-content">
         <div className="left-column">
-          <h2 className="welcome-text inter-regular">Welcome back, Guest User. Here's whats been popular</h2>
+          {currentPage === 'home' && (
+            <>
+              <h2 className="welcome-text inter-regular">
+                {displayedQuery ? `Showing matches for "${displayedQuery}"` : "Welcome back, PilarPaladin. Here's whats been popular"}
+              </h2>
 
-          <form className="search-container" onSubmit={handleSearch}>
-            <input
-              type="text"
-              placeholder="Search for books by title, author..."
-              className="search-input inter-regular"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-            <button type="submit" className="search-button inter-bold">Search</button>
-          </form>
 
-          {isLoading ? (
-            <div className="book-grid">
-              {Array.from({ length: 8 }).map((_, index) => (
-                <div key={index} className="book-card" style={{ opacity: 0.6 }}>
-                  <img src="/tempCover.png" alt="Loading..." className="book-cover" />
-                  <div className="book-info">
-                    <h3 className="book-title inter-bold" style={{ backgroundColor: '#e5e7eb', color: 'transparent', borderRadius: '4px', width: '80%' }}>Loading</h3>
-                    <p className="book-author inter-regular" style={{ backgroundColor: '#e5e7eb', color: 'transparent', borderRadius: '4px', width: '60%', marginTop: '5px' }}>Author</p>
-                    <p className="book-year inter-regular" style={{ backgroundColor: '#e5e7eb', color: 'transparent', borderRadius: '4px', width: '30%', marginTop: 'auto' }}>Year</p>
-                  </div>
+              {isLoading ? (
+                <div className="book-grid">
+                  {Array.from({ length: 8 }).map((_, index) => (
+                    <div key={index} className="book-card" style={{ opacity: 0.6 }}>
+                      <img src="/tempCover.png" alt="Loading..." className="book-cover" />
+                      <div className="book-info">
+                        <h3 className="book-title inter-bold" style={{ backgroundColor: '#e5e7eb', color: 'transparent', borderRadius: '4px', width: '80%' }}>Loading</h3>
+                        <p className="book-author inter-regular" style={{ backgroundColor: '#e5e7eb', color: 'transparent', borderRadius: '4px', width: '60%', marginTop: '5px' }}>Author</p>
+                        <p className="book-year inter-regular" style={{ backgroundColor: '#e5e7eb', color: 'transparent', borderRadius: '4px', width: '30%', marginTop: 'auto' }}>Year</p>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
-          ) : books.length === 0 ? (
-            <div className="inter-regular" style={{ textAlign: 'center', padding: '60px 20px', fontSize: '18px', color: 'var(--color-dark)' }}>
-              No books found. Try a different search term.
-            </div>
-          ) : (
-            <div className="book-grid">
-              {books.map((book, index) => (
-                <BookCard key={book.key || index} book={book} onClick={setSelectedBook} />
-              ))}
-            </div>
+              ) : books.length === 0 ? (
+                <div className="inter-regular" style={{ textAlign: 'center', padding: '60px 20px', fontSize: '18px', color: 'var(--color-dark)' }}>
+                  No books found. Try a different search term.
+                </div>
+              ) : (
+                <div className="book-grid">
+                  {books.map((book, index) => (
+                    <BookCard key={book.key || index} book={book} onClick={setSelectedBook} />
+                  ))}
+                </div>
+              )}
+            </>
           )}
+
+          {currentPage === 'bookmarks' && <Bookmarks />}
+          {currentPage === 'readlist' && <Readlist />}
+          {currentPage === 'journal' && <Journal />}
+          {currentPage === 'about' && <About />}
         </div>
 
-        <div className="right-column">
-          <div className="profile-section">
-            <div className="avatar inter-bold">👤</div>
-            <h3 className="profile-name inter-bold">Guest User <span className="pro-badge inter-bold">PRO</span></h3>
-          </div>
-
-          <div className="stats-row">
-            <div className="stat-item">
-              <span className="stat-value inter-bold">0</span>
-              <span className="stat-label inter-regular uppercase">BOOKS</span>
-            </div>
-            <div className="stat-item">
-              <span className="stat-value inter-bold">0</span>
-              <span className="stat-label inter-regular uppercase">BOOKMARKS</span>
-            </div>
-            <div className="stat-item">
-              <span className="stat-value inter-bold">0</span>
-              <span className="stat-label inter-regular uppercase">READLIST</span>
-            </div>
-          </div>
-
-          <h4 className="section-title inter-bold uppercase">FAVOURITE READS</h4>
-          <div className="fav-reads-grid">
-            {isLoading ? (
-              <>
-                <img src="/tempCover.png" alt="Loading..." className="fav-book-cover" style={{ opacity: 0.6 }} />
-                <img src="/tempCover.png" alt="Loading..." className="fav-book-cover" style={{ opacity: 0.6 }} />
-                <img src="/tempCover.png" alt="Loading..." className="fav-book-cover" style={{ opacity: 0.6 }} />
-              </>
-            ) : (
-              <>
-                <img src="https://covers.openlibrary.org/b/id/8406786-M.jpg" alt="Fav 1" className="fav-book-cover" />
-                <img src="https://covers.openlibrary.org/b/id/9251896-M.jpg" alt="Fav 2" className="fav-book-cover" />
-                <img src="https://covers.openlibrary.org/b/id/9251897-M.jpg" alt="Fav 3" className="fav-book-cover" />
-              </>
-            )}
-          </div>
-
-          <h4 className="section-title inter-bold uppercase">RECENT ACTIVITY</h4>
-          <div className="activity-list">
-            <div className="activity-item inter-regular">
-              You added <span className="activity-title inter-bold">"Dune"</span> to your readlist 2d
-            </div>
-            <div className="activity-item inter-regular">
-              You reviewed <span className="activity-title inter-bold">"Tempest"</span> to your readlist 2d
-            </div>
-            <div className="activity-item inter-regular">
-              You bookmarked <span className="activity-title inter-bold">"Ultraviolence"</span> 2d
-            </div>
-            <div className="activity-item inter-regular">
-              You added <span className="activity-title inter-bold">"Dune"</span> to your readlist 2d
-            </div>
-            <div className="activity-item inter-regular">
-              You added <span className="activity-title inter-bold">"Dune"</span> to your readlist 2d
-            </div>
-            <div className="activity-item inter-regular">
-              You added <span className="activity-title inter-bold">"Dune"</span> to your readlist 2d
-            </div>
-          </div>
-        </div>
+        <Sidebar isLoading={isLoading} />
       </main>
 
-      <BookModal book={selectedBook} onClose={() => setSelectedBook(null)} />
+      {selectedBook && <BookModal book={selectedBook} onClose={() => setSelectedBook(null)} />}
+
+      {isLogModalOpen && <LogModal onClose={() => setIsLogModalOpen(false)} />}
     </div>
   );
 }

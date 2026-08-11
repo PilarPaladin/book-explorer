@@ -234,8 +234,6 @@ body {
   display: flex;
   justify-content: space-between;
   margin-bottom: 25px;
-  padding-bottom: 25px;
-  border-bottom: 1px solid #e5e7eb;
   text-align: center;
 }
 
@@ -259,6 +257,8 @@ body {
   font-size: 13px;
   letter-spacing: 1px;
   margin-bottom: 15px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #e5e7eb;
   color: var(--color-dark);
 }
 
@@ -267,8 +267,6 @@ body {
   grid-template-columns: repeat(3, 1fr);
   gap: 10px;
   margin-bottom: 25px;
-  padding-bottom: 25px;
-  border-bottom: 1px solid #e5e7eb;
 }
 
 .fav-book-cover {
@@ -287,14 +285,18 @@ body {
   padding-left: 20px;
 }
 
-.activity-list::before {
+.activity-item::after {
   content: '';
   position: absolute;
-  left: 4px;
-  top: 5px;
-  bottom: 5px;
+  left: -17px;
+  top: 15px;
+  bottom: -26px;
   width: 2px;
   background-color: var(--color-gray);
+}
+
+.activity-item:last-child::after {
+  display: none;
 }
 
 .activity-item {
@@ -363,4 +365,16 @@ body {
 
 .action-icon.heart:hover {
   color: var(--color-red);
+}
+
+.log-search-item {
+  padding: 10px 15px;
+  cursor: pointer;
+  color: var(--color-dark);
+  font-size: 14px;
+}
+
+.log-search-item:hover {
+  background-color: #FF0000;
+  color: var(--color-white);
 }
