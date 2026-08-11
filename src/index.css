@@ -52,6 +52,9 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  position: sticky;
+  top: 0;
+  z-index: 100;
 }
 
 .header-left {
@@ -152,6 +155,7 @@ body {
   display: flex;
   flex-direction: column;
   padding: 0;
+  position: relative;
 }
 
 .book-cover {
@@ -166,6 +170,8 @@ body {
   display: flex;
   flex-direction: column;
   gap: 8px;
+  background-color: var(--color-white);
+  z-index: 2;
 }
 
 .book-title {
@@ -310,5 +316,51 @@ body {
 }
 
 .activity-title {
+  color: var(--color-red);
+}
+
+/* Hover State Styles */
+.book-cover-container {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+}
+
+.book-ribbon {
+  position: absolute;
+  top: -200px;
+  left: 10px;
+  width: 50px;
+  background-color: var(--color-white);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 17px;
+  padding: 10px 0 40px 0;
+  transition: top 0.3s ease;
+  z-index: 10;
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 0 calc(100% - 20px));
+}
+
+.book-card:hover .book-ribbon {
+  top: 0;
+}
+
+.action-icon {
+  cursor: pointer;
+  transition: color 0.2s ease, transform 0.1s ease;
+  display: flex;
+  align-items: center;
+}
+
+.action-icon.dark-icon {
+  color: var(--color-dark);
+}
+
+.action-icon:hover {
+  transform: scale(1.1);
+}
+
+.action-icon.heart:hover {
   color: var(--color-red);
 }

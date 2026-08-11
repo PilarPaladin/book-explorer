@@ -1,8 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { searchBooks, getPopularBooks } from './services/api';
+import { EyeIcon, HeartIcon, BookmarkIcon, EllipsisHorizontalIcon, ClockIcon, StarIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import { EyeIcon as EyeSolid, HeartIcon as HeartSolid, BookmarkIcon as BookmarkSolid, ClockIcon as ClockSolid, StarIcon as StarSolid } from '@heroicons/react/24/solid';
 
 // Props demonstration: BookCard component
 function BookCard({ book, onClick }) {
+  const [isRead, setIsRead] = useState(false);
+  const [isLoved, setIsLoved] = useState(false);
+  const [inReadlist, setInReadlist] = useState(false);
   // Open Library API returns cover_i, title, author_name, first_publish_year
   const coverUrl = book.cover_i
     ? `https://covers.openlibrary.org/b/id/${book.cover_i}-M.jpg`
@@ -12,7 +17,39 @@ function BookCard({ book, onClick }) {
 
   return (
     <div className="book-card" onClick={() => onClick(book)} style={{ cursor: 'pointer' }}>
-      <img src={coverUrl} alt={book.title} className="book-cover" />
+      <div className="book-cover-container">
+        <img src={coverUrl} alt={book.title} className="book-cover" />
+
+        <div className="book-ribbon" onClick={(e) => e.stopPropagation()}>
+          <span className="action-icon dark-icon" title="More options" onClick={() => onClick(book)} style={{ marginBottom: '-7px' }} >
+            <EllipsisHorizontalIcon style={{ width: '28px', height: '28px' }} strokeWidth={2} />
+          </span>
+          <span
+            className="action-icon dark-icon eye"
+            title="Toggle read"
+            onClick={() => setIsRead(!isRead)}
+            style={{ color: isRead ? '#3a9d46' : undefined }}
+          >
+            {isRead ? <EyeSolid style={{ width: '28px', height: '28px' }} /> : <EyeIcon style={{ width: '28px', height: '28px' }} strokeWidth={2} />}
+          </span>
+          <span
+            className="action-icon dark-icon heart"
+            title="Love this book"
+            onClick={() => setIsLoved(!isLoved)}
+            style={{ color: isLoved ? '#990000' : undefined }}
+          >
+            {isLoved ? <HeartSolid style={{ width: '28px', height: '28px' }} /> : <HeartIcon style={{ width: '28px', height: '28px' }} strokeWidth={2} />}
+          </span>
+          <span
+            className="action-icon dark-icon readlist"
+            title="Readlist"
+            onClick={() => setInReadlist(!inReadlist)}
+            style={{ color: inReadlist ? '#3f7dbe' : undefined }}
+          >
+            {inReadlist ? <ClockSolid style={{ width: '28px', height: '28px' }} /> : <ClockIcon style={{ width: '28px', height: '28px' }} strokeWidth={2} />}
+          </span>
+        </div>
+      </div>
       <div className="book-info">
         <h3 className="book-title inter-bold">{book.title}</h3>
         <p className="book-author inter-regular">{author}</p>
@@ -22,12 +59,83 @@ function BookCard({ book, onClick }) {
   );
 }
 
+function StarRating({ rating, setRating }) {
+  const [hoverValue, setHoverValue] = useState(null);
+  const [isHovering, setIsHovering] = useState(false);
+
+  const displayValue = hoverValue !== null ? hoverValue : rating;
+
+  const handleMouseMove = (e, index) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const isHalf = x < rect.width / 2;
+    setHoverValue(index - (isHalf ? 0.5 : 0));
+  };
+
+  return (
+    <div
+      style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
+      onMouseEnter={() => setIsHovering(true)}
+      onMouseLeave={() => { setIsHovering(false); setHoverValue(null); }}
+    >
+      <button
+        onClick={() => setRating(0)}
+        style={{
+          background: 'none', border: 'none', cursor: 'pointer', padding: 0,
+          opacity: isHovering ? 1 : 0, transition: 'opacity 0.2s ease',
+          display: 'flex', alignItems: 'center', justifyContent: 'center'
+        }}
+        title="Clear rating"
+      >
+        <XMarkIcon style={{ width: '28px', color: '#94a3b8' }} />
+      </button>
+
+      <div style={{ display: 'flex', gap: '8px' }}>
+        {[1, 2, 3, 4, 5].map((star) => {
+          let fillPercentage = 0;
+          if (displayValue >= star) fillPercentage = 100;
+          else if (displayValue === star - 0.5) fillPercentage = 50;
+
+          return (
+            <div
+              key={star}
+              onMouseMove={(e) => handleMouseMove(e, star)}
+              onClick={() => setRating(hoverValue !== null ? hoverValue : star)}
+              style={{ position: 'relative', width: '40px', height: '40px', cursor: 'pointer', color: '#0f172a' }}
+            >
+              <StarIcon style={{ width: '40px', position: 'absolute', top: 0, left: 0 }} />
+              <div style={{
+                position: 'absolute', top: 0, left: 0,
+                width: `${fillPercentage}%`, overflow: 'hidden',
+                transition: 'width 0.15s ease-out', height: '100%'
+              }}>
+                <StarSolid style={{ width: '40px' }} />
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 // Props demonstration: BookModal component
 function BookModal({ book, onClose }) {
   const [imgLoaded, setImgLoaded] = useState(false);
+  const [isRead, setIsRead] = useState(false);
+  const [isLoved, setIsLoved] = useState(false);
+  const [isBookmarked, setIsBookmarked] = useState(false);
+  const [inReadlist, setInReadlist] = useState(false);
+  const [rating, setRating] = useState(0);
 
   useEffect(() => {
     setImgLoaded(false);
+    // Reset state for new book
+    setIsRead(false);
+    setIsLoved(false);
+    setIsBookmarked(false);
+    setInReadlist(false);
+    setRating(0);
   }, [book]);
 
   if (!book) return null;
@@ -43,55 +151,85 @@ function BookModal({ book, onClose }) {
       justifyContent: 'center', alignItems: 'center', zIndex: 1000
     }} onClick={onClose}>
       <div style={{
-        backgroundColor: 'var(--color-white)', padding: '30px', borderRadius: '8px',
-        display: 'flex', gap: '30px', maxWidth: '800px', width: '90%',
-        boxShadow: '0 4px 20px rgba(0,0,0,0.15)'
+        backgroundColor: 'var(--color-white)', padding: '40px', borderRadius: '12px',
+        display: 'flex', gap: '40px', width: 'fit-content', maxWidth: '1000px',
+        maxHeight: '90vh', overflowY: 'auto',
+        boxShadow: '0 4px 20px rgba(0,0,0,0.15)', position: 'relative'
       }} onClick={e => e.stopPropagation()}>
-        <div style={{ width: '220px', flexShrink: 0 }}>
+
+        <button
+          onClick={onClose}
+          style={{ position: 'absolute', top: '20px', right: '20px', background: 'none', border: 'none', cursor: 'pointer', padding: '5px' }}
+          title="Close"
+        >
+          <XMarkIcon style={{ width: '32px', color: 'var(--color-dark)' }} />
+        </button>
+
+        {/* Left Side: Cover Image */}
+        <div style={{ width: '320px', flexShrink: 0, display: 'flex', justifyContent: 'flex-start', alignItems: 'flex-start' }}>
           {!imgLoaded && (
-            <img src="/tempCover.png" alt="Loading..." style={{ width: '220px', objectFit: 'contain', borderRadius: '4px', border: '1px solid var(--color-gray)', opacity: 0.6 }} />
+            <img src="/tempCover.png" alt="Loading..." style={{ width: '100%', objectFit: 'contain', objectPosition: 'top left', borderRadius: '8px', opacity: 0.6 }} />
           )}
-          <img 
-            src={coverUrl} 
-            alt={book.title} 
-            onLoad={() => setImgLoaded(true)} 
-            style={{ 
-              width: '220px', 
-              objectFit: 'cover', 
-              borderRadius: '4px', 
-              border: '1px solid var(--color-gray)', 
-              display: imgLoaded ? 'block' : 'none' 
-            }} 
+          <img
+            src={coverUrl}
+            alt={book.title}
+            onLoad={() => setImgLoaded(true)}
+            style={{
+              width: '100%',
+              objectFit: 'contain',
+              objectPosition: 'top left',
+              borderRadius: '8px',
+              display: imgLoaded ? 'block' : 'none'
+            }}
           />
         </div>
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-          <h2 className="rakkas-regular" style={{ color: 'var(--color-red)', fontSize: '36px', marginTop: 0, marginBottom: '10px' }}>{book.title}</h2>
 
-          <div className="inter-regular" style={{ display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '15px' }}>
-            <p style={{ margin: 0 }}><strong>Author:</strong> {book.author_name?.join(', ') || 'Unknown'}</p>
-            <p style={{ margin: 0 }}><strong>First Published:</strong> {book.first_publish_year || 'Unknown'}</p>
-            <p style={{ margin: 0 }}><strong>Editions:</strong> {book.edition_count || 1}</p>
-            {book.subject && (
-              <div style={{ marginTop: '10px' }}>
-                <strong style={{ display: 'block', marginBottom: '5px' }}>Tags:</strong>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-                  {book.subject.slice(0, 8).map((sub, i) => (
-                    <span key={i} style={{
-                      backgroundColor: '#f3f4f6', padding: '4px 8px',
-                      borderRadius: '4px', fontSize: '12px', color: 'var(--color-dark)'
-                    }}>{sub}</span>
-                  ))}
-                </div>
-              </div>
-            )}
+        {/* Right Side: Details & Actions */}
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: '10px 0' }}>
+
+          {/* Top Section: Title & Details */}
+          <div style={{ paddingRight: '20px' }}>
+            <h2 className="rakkas-regular" style={{ color: 'var(--color-red)', fontSize: '48px', marginTop: 0, marginBottom: '20px', lineHeight: '1.1' }}>
+              {book.title}
+            </h2>
+            <div className="inter-regular" style={{ fontSize: '18px', color: 'var(--color-dark)', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <p style={{ margin: 0 }}><strong>Author:</strong> {book.author_name?.join(', ') || 'Unknown'}</p>
+              <p style={{ margin: 0 }}><strong>First Published:</strong> {book.first_publish_year || 'Unknown'}</p>
+              <p style={{ margin: 0 }}><strong>Editions:</strong> {book.edition_count || 1}</p>
+              <p style={{ margin: 0 }}><strong>Reading time:</strong> 8hrs, 22mins</p>
+            </div>
           </div>
 
-          <button className="inter-bold" style={{
-            marginTop: 'auto', alignSelf: 'flex-start', padding: '10px 24px',
-            backgroundColor: 'var(--color-red)', color: 'white',
-            border: 'none', borderRadius: '4px', cursor: 'pointer',
-            fontSize: '14px'
-          }} onClick={onClose}>Close</button>
+          {/* Center Section: Actions Grid & Rating */}
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', alignSelf: 'flex-start', marginTop: '50px', gap: '30px' }}>
+
+            {/* Actions 2x2 Grid */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '25px 60px', justifyItems: 'start' }}>
+              <button onClick={() => setIsLoved(!isLoved)} className="inter-regular" style={{ display: 'flex', alignItems: 'center', gap: '10px', background: 'none', border: 'none', cursor: 'pointer', fontSize: '22px', color: 'var(--color-dark)', padding: 0 }}>
+                {isLoved ? <HeartSolid style={{ width: '32px', color: '#990000' }} /> : <HeartIcon style={{ width: '32px' }} />}
+                Love
+              </button>
+              <button onClick={() => setIsBookmarked(!isBookmarked)} className="inter-regular" style={{ display: 'flex', alignItems: 'center', gap: '10px', background: 'none', border: 'none', cursor: 'pointer', fontSize: '22px', color: 'var(--color-dark)', padding: 0 }}>
+                {isBookmarked ? <BookmarkSolid style={{ width: '32px', color: '#d4af37' }} /> : <BookmarkIcon style={{ width: '32px' }} />}
+                Bookmark
+              </button>
+              <button onClick={() => setIsRead(!isRead)} className="inter-regular" style={{ display: 'flex', alignItems: 'center', gap: '10px', background: 'none', border: 'none', cursor: 'pointer', fontSize: '22px', color: 'var(--color-dark)', padding: 0 }}>
+                {isRead ? <EyeSolid style={{ width: '32px', color: '#3a9d46' }} /> : <EyeIcon style={{ width: '32px' }} />}
+                {isRead ? 'Finished' : 'Unfinished'}
+              </button>
+              <button onClick={() => setInReadlist(!inReadlist)} className="inter-regular" style={{ display: 'flex', alignItems: 'center', gap: '10px', background: 'none', border: 'none', cursor: 'pointer', fontSize: '22px', color: 'var(--color-dark)', padding: 0 }}>
+                {inReadlist ? <ClockSolid style={{ width: '32px', color: '#3f7dbe' }} /> : <ClockIcon style={{ width: '32px' }} />}
+                Readlist
+              </button>
+            </div>
+
+            {/* Stars & Rated Text */}
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '5px' }}>
+              <StarRating rating={rating} setRating={setRating} />
+              <span className="inter-regular" style={{ fontSize: '24px', color: 'var(--color-dark)' }}>Rated</span>
+            </div>
+
+          </div>
         </div>
       </div>
     </div>
@@ -141,8 +279,8 @@ function App() {
           <h1 className="brand-name rakkas-regular">myArkived</h1>
         </div>
         <nav className="header-nav inter-bold">
-          <a href="#" className="nav-link">Genres</a>
-          <a href="#" className="nav-link">Browse</a>
+          <a href="#" className="nav-link">Bookmarks</a>
+          <a href="#" className="nav-link">Readlists</a>
           <a href="#" className="nav-link">About</a>
         </nav>
       </header>
