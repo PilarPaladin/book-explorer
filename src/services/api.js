@@ -1,5 +1,5 @@
 export const searchBooks = async (query) => {
-  const url = `https://openlibrary.org/search.json?q=${encodeURIComponent(query)}&limit=20`;
+  const url = `https://openlibrary.org/search.json?q=${encodeURIComponent(query)}&limit=100`;
   const response = await fetch(url);
   if (!response.ok) {
     throw new Error('Failed to fetch books');

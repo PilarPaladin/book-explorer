@@ -5,6 +5,31 @@
   --color-gray: #d1d5db;
 }
 
+/* Custom Scrollbar Styles */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #FFFFFF;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #990000;
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #770000;
+}
+
+/* Firefox scrollbar support */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #990000 #FFFFFF;
+}
+
 body {
   margin: 0;
   padding: 0;
@@ -330,8 +355,8 @@ body {
 
 .book-ribbon {
   position: absolute;
-  top: -200px;
-  left: 10px;
+  top: -210px;
+  left: 15px;
   width: 50px;
   background-color: var(--color-white);
   display: flex;
