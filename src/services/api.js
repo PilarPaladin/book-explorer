@@ -9,6 +9,6 @@ export const searchBooks = async (query) => {
 };
 
 export const getPopularBooks = async () => {
-  // A simple predefined search to simulate "popular" books for the initial view
-  return searchBooks('lord of the rings');
+  // predefined search to simulate "popular" books for the initial view
+  return searchBooks('computer');
 };
