@@ -1,21 +1,50 @@
 import React from 'react';
+import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 
-const Header = () => {
+export default function Header({ 
+  setCurrentPage, 
+  handleSearch, 
+  searchQuery, 
+  setSearchQuery, 
+  setIsLogModalOpen 
+}) {
   return (
-    <header className="bg-ao3-red text-white py-4 px-6 shadow-md border-b-4 border-ao3-darkred">
-      <div className="max-w-6xl mx-auto flex justify-between items-center">
-        <h1 className="text-3xl font-serif font-bold italic tracking-wider">
-          <span className="text-white">my</span><span className="text-gray-200">Arkived</span>
-        </h1>
-        <nav className="hidden md:flex space-x-6 text-sm font-semibold">
-          <a href="#" className="hover:underline">Fandoms</a>
-          <a href="#" className="hover:underline">Browse</a>
-          <a href="#" className="hover:underline">Search</a>
-          <a href="#" className="hover:underline">About</a>
-        </nav>
+    <header className="header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 40px' }}>
+      <div className="header-left" style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+        <div onClick={() => setCurrentPage('home')} style={{ cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
+          <img src="/logo.png" alt="Logo" className="logo" />
+          <h1 className="brand-name rakkas-regular">myArkived</h1>
+        </div>
       </div>
+      <nav className="header-nav inter-bold" style={{ display: 'flex', alignItems: 'center', gap: '25px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+          <a href="#" className="nav-link" onClick={(e) => { e.preventDefault(); setCurrentPage('bookmarks'); }}>Bookmarks</a>
+          <a href="#" className="nav-link" onClick={(e) => { e.preventDefault(); setCurrentPage('readlist'); }}>Readlist</a>
+          <a href="#" className="nav-link" onClick={(e) => { e.preventDefault(); setCurrentPage('journal'); }}>Journal</a>
+          <a href="#" className="nav-link" onClick={(e) => { e.preventDefault(); setCurrentPage('books'); }}>Books</a>
+        </div>
+
+        <form className="search-container" onSubmit={handleSearch} style={{ margin: 0, height: '36px', display: 'flex', position: 'relative', alignItems: 'center' }}>
+          <input
+            type="text"
+            placeholder="Search myArkived"
+            className="search-input inter-regular"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            style={{ padding: '0 35px 0 15px', height: '100%', fontSize: '14px', width: '240px', borderRadius: '4px', border: 'none', outline: 'none' }}
+          />
+          <button type="submit" style={{ position: 'absolute', right: '10px', background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center', color: '#64748b' }}>
+            <MagnifyingGlassIcon style={{ width: '18px' }} />
+          </button>
+        </form>
+        <button className="inter-bold" onClick={() => setIsLogModalOpen(true)} style={{
+          backgroundColor: '#3f7dbe', color: 'white', border: 'none',
+          borderRadius: '4px', padding: '8px 16px', fontSize: '15px', cursor: 'pointer',
+          display: 'flex', alignItems: 'center', gap: '5px'
+        }}>
+          + LOG
+        </button>
+      </nav>
     </header>
   );
-};
-
-export default Header;
+}

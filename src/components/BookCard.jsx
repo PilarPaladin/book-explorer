@@ -1,48 +1,64 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { EyeIcon, HeartIcon, BookmarkIcon, EllipsisHorizontalIcon, ClockIcon } from '@heroicons/react/24/outline';
+import { EyeIcon as EyeSolid, HeartIcon as HeartSolid, BookmarkIcon as BookmarkSolid, ClockIcon as ClockSolid } from '@heroicons/react/24/solid';
 
-const BookCard = ({ book, onClick }) => {
-  // Use Medium size cover if available
-  const coverUrl = book.cover_i 
-    ? `https://covers.openlibrary.org/b/id/${book.cover_i}-M.jpg` 
-    : null;
+export default function BookCard({ book, onClick }) {
+  const [isRead, setIsRead] = useState(false);
+  const [isLoved, setIsLoved] = useState(false);
+  const [inReadlist, setInReadlist] = useState(false);
+  
+  // Open Library API returns cover_i, title, author_name, first_publish_year
+  const coverUrl = book.cover_i
+    ? `https://covers.openlibrary.org/b/id/${book.cover_i}-M.jpg`
+    : '/tempCover.png';
+
+  const author = book.author_name ? `by ${book.author_name[0]}` : 'Unknown Author';
 
   return (
-    <div 
-      className="group cursor-pointer flex flex-col relative rounded overflow-hidden bg-gray-100 shadow-sm border border-gray-200 hover:border-gray-400 hover:shadow-md transition-all duration-200 h-full"
-      onClick={() => onClick(book)}
-    >
-      <div className="relative aspect-[2/3] w-full bg-gray-300 flex items-center justify-center overflow-hidden">
-        {coverUrl ? (
-          <img 
-            src={coverUrl} 
-            alt={`Cover of ${book.title}`} 
-            className="w-full h-full object-cover group-hover:opacity-90 transition-opacity"
-            loading="lazy"
-          />
-        ) : (
-          <div className="text-center p-4 text-gray-500 font-semibold flex flex-col items-center justify-center h-full w-full">
-            <span className="text-2xl block mb-2">📖</span>
-            <span className="text-sm">No Cover Available</span>
-          </div>
-        )}
-      </div>
-      <div className="p-3 flex-grow flex flex-col justify-between bg-white border-t border-gray-200">
-        <div>
-          <h3 className="font-bold text-sm leading-tight text-ao3-red group-hover:underline line-clamp-2" title={book.title}>
-            {book.title}
-          </h3>
-          <p className="text-xs text-gray-600 mt-1 line-clamp-1">
-            by {book.author_name ? book.author_name.join(', ') : 'Unknown Author'}
-          </p>
-        </div>
-        {book.first_publish_year && (
-          <span className="text-xs text-gray-400 mt-2 block">
-            {book.first_publish_year}
+    <div className="book-card" onClick={() => onClick(book)} style={{ cursor: 'pointer' }}>
+      <div className="book-cover-container">
+        <img
+          src={coverUrl}
+          alt={book.title}
+          className="book-cover"
+          onError={(e) => { e.target.onerror = null; e.target.src = '/tempCover.png'; }}
+        />
+
+        <div className="book-ribbon" onClick={(e) => e.stopPropagation()}>
+          <span className="action-icon dark-icon" title="More options" onClick={() => onClick(book)} style={{ marginBottom: '-7px' }} >
+            <EllipsisHorizontalIcon style={{ width: '28px', height: '28px' }} strokeWidth={2} />
           </span>
-        )}
+          <span
+            className="action-icon dark-icon eye"
+            title="Toggle read"
+            onClick={() => setIsRead(!isRead)}
+            style={{ color: isRead ? '#3a9d46' : undefined }}
+          >
+            {isRead ? <EyeSolid style={{ width: '28px', height: '28px' }} /> : <EyeIcon style={{ width: '28px', height: '28px' }} strokeWidth={2} />}
+          </span>
+          <span
+            className="action-icon dark-icon heart"
+            title="Love this book"
+            onClick={() => setIsLoved(!isLoved)}
+            style={{ color: isLoved ? '#990000' : undefined }}
+          >
+            {isLoved ? <HeartSolid style={{ width: '28px', height: '28px' }} /> : <HeartIcon style={{ width: '28px', height: '28px' }} strokeWidth={2} />}
+          </span>
+          <span
+            className="action-icon dark-icon readlist"
+            title="Readlist"
+            onClick={() => setInReadlist(!inReadlist)}
+            style={{ color: inReadlist ? '#3f7dbe' : undefined }}
+          >
+            {inReadlist ? <ClockSolid style={{ width: '28px', height: '28px' }} /> : <ClockIcon style={{ width: '28px', height: '28px' }} strokeWidth={2} />}
+          </span>
+        </div>
+      </div>
+      <div className="book-info">
+        <h3 className="book-title inter-bold">{book.title}</h3>
+        <p className="book-author inter-regular">{author}</p>
+        <p className="book-year inter-regular">{book.first_publish_year}</p>
       </div>
     </div>
   );
-};
-
-export default BookCard;
+}
