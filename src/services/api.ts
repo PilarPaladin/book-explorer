@@ -11,6 +11,6 @@ export const searchBooks = async (query: string): Promise<Book[]> => {
 };
 
 export const getPopularBooks = async (): Promise<Book[]> => {
-  // A simple predefined search to simulate "popular" books for the initial view
-  return searchBooks('lord of the rings');
+  //predefined search to simulate "popular" books for the initial view
+  return searchBooks('computer');
 };

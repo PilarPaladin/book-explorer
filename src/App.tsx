@@ -8,7 +8,7 @@ import Journal from './pages/Journal';
 import Books from './pages/Books';
 import Sidebar from './components/Sidebar';
 import BookModal from './components/BookModal';
-import BookCard from './components/BookCard';
+import BookCard, { Book } from './components/BookCard';
 import LogModal from './components/LogModal';
 import Header from './components/Header';
 import LoadingGrid from './components/LoadingGrid';
@@ -18,11 +18,11 @@ import LoadingGrid from './components/LoadingGrid';
 function App() {
   const [currentPage, setCurrentPage] = useState('home');
   const [isLogModalOpen, setIsLogModalOpen] = useState(false);
-  const [books, setBooks] = useState([]);
+  const [books, setBooks] = useState<Book[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [displayedQuery, setDisplayedQuery] = useState('');
-  const [selectedBook, setSelectedBook] = useState(null);
+  const [selectedBook, setSelectedBook] = useState<Book | null>(null);
 
   useEffect(() => {
     const fetchInitial = async () => {
@@ -38,7 +38,7 @@ function App() {
     fetchInitial();
   }, []);
 
-  const handleSearch = async (e) => {
+  const handleSearch = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!searchQuery.trim()) return;
 

@@ -20,7 +20,7 @@ export default function BookCard({ book, onClick }: BookCardProps) {
   const [isRead, setIsRead] = useState(false);
   const [isLoved, setIsLoved] = useState(false);
   const [inReadlist, setInReadlist] = useState(false);
-  
+
   // Open Library API returns cover_i, title, author_name, first_publish_year
   const coverUrl = book.cover_i
     ? `https://covers.openlibrary.org/b/id/${book.cover_i}-M.jpg`
@@ -35,7 +35,7 @@ export default function BookCard({ book, onClick }: BookCardProps) {
           src={coverUrl}
           alt={book.title}
           className="book-cover"
-          onError={(e) => { e.target.onerror = null; e.target.src = '/tempCover.png'; }}
+          onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = '/tempCover.png'; }}
         />
 
         <div className="book-ribbon" onClick={(e) => e.stopPropagation()}>
