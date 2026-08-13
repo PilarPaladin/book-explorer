@@ -6,6 +6,7 @@ import Bookmarks from './pages/Bookmarks';
 import Readlist from './pages/Readlist';
 import Journal from './pages/Journal';
 import Books from './pages/Books';
+import Welcome from './pages/Welcome';
 import Sidebar from './components/Sidebar';
 import BookModal from './components/BookModal';
 import BookCard, { Book } from './components/BookCard';
@@ -16,6 +17,7 @@ import LoadingGrid from './components/LoadingGrid';
 
 
 function App() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false); // Simulated auth state
   const [currentPage, setCurrentPage] = useState('home');
   const [isLogModalOpen, setIsLogModalOpen] = useState(false);
   const [books, setBooks] = useState<Book[]>([]);
@@ -64,8 +66,11 @@ function App() {
         setIsLogModalOpen={setIsLogModalOpen}
       />
 
-      <main className="main-content">
-        <div className="left-column">
+      {!isLoggedIn ? (
+        <Welcome />
+      ) : (
+        <main className="main-content">
+          <div className="left-column">
           {currentPage === 'home' && (
             <>
               <h2 className="welcome-text inter-regular">
@@ -97,6 +102,7 @@ function App() {
 
         <Sidebar isLoading={isLoading} />
       </main>
+      )}
 
       {selectedBook && <BookModal book={selectedBook} onClose={() => setSelectedBook(null)} />}
 
