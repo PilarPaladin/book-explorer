@@ -1,10 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import { searchBooks } from '../services/api';
+import { Book } from './BookCard';
 
-export default function LogModal({ onClose }) {
+interface LogModalProps {
+  onClose: () => void;
+}
+
+export default function LogModal({ onClose }: LogModalProps) {
   const [query, setQuery] = useState('');
-  const [results, setResults] = useState([]);
+  const [results, setResults] = useState<Book[]>([]);
   const [isSearching, setIsSearching] = useState(false);
 
   useEffect(() => {

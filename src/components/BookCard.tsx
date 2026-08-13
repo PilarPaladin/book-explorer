@@ -2,7 +2,21 @@ import React, { useState } from 'react';
 import { EyeIcon, HeartIcon, BookmarkIcon, EllipsisHorizontalIcon, ClockIcon } from '@heroicons/react/24/outline';
 import { EyeIcon as EyeSolid, HeartIcon as HeartSolid, BookmarkIcon as BookmarkSolid, ClockIcon as ClockSolid } from '@heroicons/react/24/solid';
 
-export default function BookCard({ book, onClick }) {
+export interface Book {
+  cover_i?: number;
+  title: string;
+  author_name?: string[];
+  first_publish_year?: number;
+  key?: string;
+  [key: string]: any;
+}
+
+interface BookCardProps {
+  book: Book;
+  onClick: (book: Book) => void;
+}
+
+export default function BookCard({ book, onClick }: BookCardProps) {
   const [isRead, setIsRead] = useState(false);
   const [isLoved, setIsLoved] = useState(false);
   const [inReadlist, setInReadlist] = useState(false);

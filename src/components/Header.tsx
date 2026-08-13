@@ -1,13 +1,21 @@
 import React from 'react';
 import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 
+interface HeaderProps {
+  setCurrentPage: (page: string) => void;
+  handleSearch: (e: React.FormEvent<HTMLFormElement>) => void;
+  searchQuery: string;
+  setSearchQuery: (query: string) => void;
+  setIsLogModalOpen: (isOpen: boolean) => void;
+}
+
 export default function Header({ 
   setCurrentPage, 
   handleSearch, 
   searchQuery, 
   setSearchQuery, 
   setIsLogModalOpen 
-}) {
+}: HeaderProps) {
   return (
     <header className="header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 40px' }}>
       <div className="header-left" style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>

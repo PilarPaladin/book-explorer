@@ -1,6 +1,10 @@
 import React from 'react';
 
-export default function Sidebar({ isLoading }) {
+interface SidebarProps {
+  isLoading: boolean;
+}
+
+export default function Sidebar({ isLoading }: SidebarProps) {
   return (
     <div className="right-column">
       <div className="profile-section">

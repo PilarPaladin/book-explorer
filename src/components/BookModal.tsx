@@ -1,14 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { EyeIcon, HeartIcon, BookmarkIcon, ClockIcon, StarIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import { EyeIcon as EyeSolid, HeartIcon as HeartSolid, BookmarkIcon as BookmarkSolid, ClockIcon as ClockSolid, StarIcon as StarSolid } from '@heroicons/react/24/solid';
+import { Book } from './BookCard';
 
-function StarRating({ rating, setRating }) {
+interface StarRatingProps {
+  rating: number;
+  setRating: (rating: number) => void;
+}
+
+function StarRating({ rating, setRating }: StarRatingProps) {
   const [hoverValue, setHoverValue] = useState(null);
   const [isHovering, setIsHovering] = useState(false);
 
   const displayValue = hoverValue !== null ? hoverValue : rating;
 
-  const handleMouseMove = (e, index) => {
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>, index: number) => {
     const rect = e.currentTarget.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const isHalf = x < rect.width / 2;
@@ -63,7 +69,12 @@ function StarRating({ rating, setRating }) {
   );
 }
 
-export default function BookModal({ book, onClose }) {
+interface BookModalProps {
+  book: Book | null;
+  onClose: () => void;
+}
+
+export default function BookModal({ book, onClose }: BookModalProps) {
   const [imgLoaded, setImgLoaded] = useState(false);
   const [isRead, setIsRead] = useState(false);
   const [isLoved, setIsLoved] = useState(false);

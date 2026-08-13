@@ -1,6 +1,10 @@
 import React from 'react';
 
-export default function LoadingGrid({ count = 8 }) {
+interface LoadingGridProps {
+  count?: number;
+}
+
+export default function LoadingGrid({ count = 8 }: LoadingGridProps) {
   return (
     <div className="book-grid">
       {Array.from({ length: count }).map((_, index) => (

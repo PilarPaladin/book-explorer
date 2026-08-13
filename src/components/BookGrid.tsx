@@ -1,7 +1,13 @@
 import React from 'react';
-import BookCard from './BookCard';
+import BookCard, { Book } from './BookCard';
 
-const BookGrid = ({ books, onBookClick, title }) => {
+interface BookGridProps {
+  books: Book[];
+  onBookClick: (book: Book) => void;
+  title?: string;
+}
+
+const BookGrid = ({ books, onBookClick, title }: BookGridProps) => {
   if (!books || books.length === 0) return null;
 
   return (

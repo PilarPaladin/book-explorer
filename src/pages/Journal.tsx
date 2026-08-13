@@ -1,6 +1,8 @@
 import React from 'react';
 
-export default function Journal() {
+interface JournalProps {}
+
+export default function Journal(props: JournalProps) {
     return (
         <div style={{ padding: '50px', textAlign: 'center' }}>
             <h2 className="inter-bold" style={{ fontSize: '32px', color: 'var(--color-dark)' }}>Journal</h2>
