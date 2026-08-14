@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { EyeIcon, HeartIcon, BookmarkIcon, ClockIcon, StarIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import { EyeIcon, HeartIcon, BookmarkIcon, ClockIcon, StarIcon, XMarkIcon, ArrowLeftIcon } from '@heroicons/react/24/outline';
 import { EyeIcon as EyeSolid, HeartIcon as HeartSolid, BookmarkIcon as BookmarkSolid, ClockIcon as ClockSolid, StarIcon as StarSolid } from '@heroicons/react/24/solid';
-import { Book } from './BookCard';
+import { Book } from '../components/BookCard';
+import { useBookActivity } from '../hooks/useBookActivity';
+import BookmarkModal from '../components/BookmarkModal';
+import FinishedModal from '../components/FinishedModal';
 
 interface StarRatingProps {
   rating: number;
@@ -9,7 +12,7 @@ interface StarRatingProps {
 }
 
 function StarRating({ rating, setRating }: StarRatingProps) {
-  const [hoverValue, setHoverValue] = useState(null);
+  const [hoverValue, setHoverValue] = useState<number | null>(null);
   const [isHovering, setIsHovering] = useState(false);
 
   const displayValue = hoverValue !== null ? hoverValue : rating;
@@ -41,25 +44,25 @@ function StarRating({ rating, setRating }: StarRatingProps) {
       </button>
 
       <div style={{ display: 'flex', gap: '8px' }}>
-        {[1, 2, 3, 4, 5].map((star) => {
-          let fillPercentage = 0;
-          if (displayValue >= star) fillPercentage = 100;
-          else if (displayValue === star - 0.5) fillPercentage = 50;
+        {[1, 2, 3, 4, 5].map((index) => {
+          const isFull = displayValue >= index;
+          const isHalf = displayValue >= index - 0.5 && displayValue < index;
 
           return (
             <div
-              key={star}
-              onMouseMove={(e) => handleMouseMove(e, star)}
-              onClick={() => setRating(hoverValue !== null ? hoverValue : star)}
-              style={{ position: 'relative', width: '40px', height: '40px', cursor: 'pointer', color: '#0f172a' }}
+              key={index}
+              onMouseMove={(e) => handleMouseMove(e, index)}
+              onClick={() => setRating(displayValue)}
+              style={{ cursor: 'pointer', display: 'flex', alignItems: 'center' }}
             >
-              <StarIcon style={{ width: '40px', position: 'absolute', top: 0, left: 0 }} />
-              <div style={{
-                position: 'absolute', top: 0, left: 0,
-                width: `${fillPercentage}%`, overflow: 'hidden',
-                transition: 'width 0.15s ease-out', height: '100%'
-              }}>
-                <StarSolid style={{ width: '40px' }} />
+              <div style={{ position: 'relative', width: '40px', height: '40px' }}>
+                <StarIcon style={{ position: 'absolute', top: 0, left: 0, width: '40px', color: '#9ca3af' }} />
+                <div style={{
+                  position: 'absolute', top: 0, left: 0,
+                  width: isFull ? '100%' : isHalf ? '50%' : '0%', overflow: 'hidden', color: '#374151'
+                }}>
+                  <StarSolid style={{ width: '40px' }} />
+                </div>
               </div>
             </div>
           );
@@ -69,68 +72,43 @@ function StarRating({ rating, setRating }: StarRatingProps) {
   );
 }
 
-interface BookModalProps {
-  book: Book | null;
-  onClose: () => void;
+interface FicProps {
+  book: Book;
+  onBack: () => void;
 }
 
-export default function BookModal({ book, onClose }: BookModalProps) {
+export default function Fic({ book, onBack }: FicProps) {
   const [imgLoaded, setImgLoaded] = useState(false);
-  const [isRead, setIsRead] = useState(false);
-  const [isLoved, setIsLoved] = useState(false);
-  const [isBookmarked, setIsBookmarked] = useState(false);
-  const [inReadlist, setInReadlist] = useState(false);
-  const [rating, setRating] = useState(0);
+  const { activity, updateActivity } = useBookActivity(book);
+  const { isRead, isLoved, isBookmarked, inReadlist, rating, startedOnDate } = activity;
   const [hoverBookmark, setHoverBookmark] = useState(false);
   const [hoverReadlist, setHoverReadlist] = useState(false);
-
-  useEffect(() => {
-    const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
-    document.body.style.overflow = 'hidden';
-    document.body.style.paddingRight = `${scrollbarWidth}px`;
-    return () => {
-      document.body.style.overflow = 'unset';
-      document.body.style.paddingRight = '0px';
-    };
-  }, []);
+  const [isBookmarkModalOpen, setIsBookmarkModalOpen] = useState(false);
+  const [isFinishedModalOpen, setIsFinishedModalOpen] = useState(false);
 
   useEffect(() => {
     setImgLoaded(false);
-    // Reset state for new book
-    setIsRead(false);
-    setIsLoved(false);
-    setIsBookmarked(false);
-    setInReadlist(false);
-    setRating(0);
   }, [book]);
-
-  if (!book) return null;
 
   const coverUrl = book.cover_i
     ? `https://covers.openlibrary.org/b/id/${book.cover_i}-L.jpg`
     : '/tempCover.png';
 
   return (
-    <div style={{
-      position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-      backgroundColor: 'rgba(0,0,0,0.6)', display: 'flex',
-      justifyContent: 'center', alignItems: 'center', zIndex: 1000
-    }} onClick={onClose}>
+    <div style={{ width: '100%', padding: '0px 0px 40px 0px' }}>
+      
+      <button 
+        onClick={onBack}
+        className="inter-bold"
+        style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'none', border: 'none', cursor: 'pointer', padding: 0, color: 'var(--color-dark)', marginBottom: '20px', fontSize: '15px' }}
+      >
+        <ArrowLeftIcon style={{ width: '20px' }} />
+        Back
+      </button>
+
       <div style={{
-        backgroundColor: 'var(--color-white)', padding: '40px', borderRadius: '12px',
-        display: 'flex', gap: '40px', width: 'fit-content', maxWidth: '1000px',
-        maxHeight: '90vh', overflowY: 'auto',
-        boxShadow: '0 4px 20px rgba(0,0,0,0.15)', position: 'relative'
-      }} onClick={e => e.stopPropagation()}>
-
-        <button
-          onClick={onClose}
-          style={{ position: 'absolute', top: '20px', right: '20px', background: 'none', border: 'none', cursor: 'pointer', padding: '5px' }}
-          title="Close"
-        >
-          <XMarkIcon style={{ width: '32px', color: 'var(--color-dark)' }} />
-        </button>
-
+        display: 'flex', gap: '40px', width: '100%', position: 'relative'
+      }}>
         {/* Left Side: Cover Image & Stats */}
         <div style={{ width: '320px', flexShrink: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '15px' }}>
           {!imgLoaded && (
@@ -140,7 +118,7 @@ export default function BookModal({ book, onClose }: BookModalProps) {
             src={coverUrl}
             alt={book.title}
             onLoad={() => setImgLoaded(true)}
-            onError={(e) => { e.target.onerror = null; e.target.src = '/tempCover.png'; setImgLoaded(true); }}
+            onError={(e) => { (e.target as HTMLImageElement).onerror = null; (e.target as HTMLImageElement).src = '/tempCover.png'; setImgLoaded(true); }}
             style={{
               width: '100%',
               objectFit: 'contain',
@@ -196,31 +174,31 @@ export default function BookModal({ book, onClose }: BookModalProps) {
             {/* Rating */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
               <span className="inter-regular" style={{ fontSize: '20px', color: 'var(--color-dark)' }}>Rated</span>
-              <StarRating rating={rating} setRating={setRating} />
+              <StarRating rating={rating} setRating={(r) => updateActivity({ rating: r })} />
             </div>
 
             {/* Actions 2x2 Grid */}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px 40px', justifyItems: 'start' }}>
-              <button onClick={() => setIsLoved(!isLoved)} className="inter-regular" style={{ width: '200px', justifyContent: 'flex-start', display: 'flex', alignItems: 'center', gap: '10px', background: 'none', border: 'none', cursor: 'pointer', fontSize: '20px', color: 'var(--color-dark)', padding: 0 }}>
+              <button onClick={() => updateActivity({ isLoved: !isLoved })} className="inter-regular" style={{ width: '200px', justifyContent: 'flex-start', display: 'flex', alignItems: 'center', gap: '10px', background: 'none', border: 'none', cursor: 'pointer', fontSize: '20px', color: 'var(--color-dark)', padding: 0 }}>
                 {isLoved ? <HeartSolid style={{ width: '28px', color: '#990000' }} /> : <HeartIcon style={{ width: '28px' }} />}
                 {isLoved ? 'Loved' : 'Love'}
               </button>
               <button
-                onClick={() => setIsBookmarked(!isBookmarked)}
+                onClick={() => setIsBookmarkModalOpen(true)}
                 onMouseEnter={() => setHoverBookmark(true)}
                 onMouseLeave={() => setHoverBookmark(false)}
                 className="inter-regular"
                 style={{ width: '200px', justifyContent: 'flex-start', display: 'flex', alignItems: 'center', gap: '10px', background: 'none', border: 'none', cursor: 'pointer', fontSize: '20px', color: 'var(--color-dark)', padding: 0 }}
               >
                 {isBookmarked ? <BookmarkSolid style={{ width: '28px', color: '#d4af37' }} /> : <BookmarkIcon style={{ width: '28px' }} />}
-                {isBookmarked ? (hoverBookmark ? 'Remove' : 'Bookmark') : 'Bookmark'}
+                Add bookmark
               </button>
-              <button onClick={() => setIsRead(!isRead)} className="inter-regular" style={{ width: '200px', justifyContent: 'flex-start', display: 'flex', alignItems: 'center', gap: '10px', background: 'none', border: 'none', cursor: 'pointer', fontSize: '20px', color: 'var(--color-dark)', padding: 0 }}>
-                {isRead ? <EyeSolid style={{ width: '28px', color: '#3a9d46' }} /> : <EyeIcon style={{ width: '28px' }} />}
-                {isRead ? 'Finished' : 'Unfinished'}
+              <button onClick={() => setIsFinishedModalOpen(true)} className="inter-regular" style={{ width: '200px', justifyContent: 'flex-start', display: 'flex', alignItems: 'center', gap: '10px', background: 'none', border: 'none', cursor: 'pointer', fontSize: '20px', color: 'var(--color-dark)', padding: 0 }}>
+                {isRead ? <EyeSolid style={{ width: '28px', color: '#3a9d46' }} /> : (startedOnDate ? <EyeSolid style={{ width: '28px', color: '#eab308' }} /> : <EyeIcon style={{ width: '28px' }} />)}
+                {isRead ? 'Finished' : (startedOnDate ? 'In Progress' : 'Unfinished')}
               </button>
               <button
-                onClick={() => setInReadlist(!inReadlist)}
+                onClick={() => updateActivity({ inReadlist: !inReadlist })}
                 onMouseEnter={() => setHoverReadlist(true)}
                 onMouseLeave={() => setHoverReadlist(false)}
                 className="inter-regular"
@@ -233,6 +211,29 @@ export default function BookModal({ book, onClose }: BookModalProps) {
           </div>
         </div>
       </div>
+
+      {isBookmarkModalOpen && (
+        <BookmarkModal
+          onClose={() => setIsBookmarkModalOpen(false)}
+          onSave={(chapter, page, notes) => {
+            const currentBookmarks = activity.bookmarks || [];
+            updateActivity({
+              isBookmarked: true,
+              bookmarks: [...currentBookmarks, { chapter, page, notes }]
+            });
+            setIsBookmarkModalOpen(false);
+          }}
+        />
+      )}
+
+      {isFinishedModalOpen && (
+        <FinishedModal
+          book={book}
+          activity={activity}
+          onClose={() => setIsFinishedModalOpen(false)}
+          onSave={updateActivity}
+        />
+      )}
     </div>
   );
 }

@@ -1,7 +1,7 @@
 import { Book } from '../components/BookCard';
 
 export const searchBooks = async (query: string): Promise<Book[]> => {
-  const url = `https://openlibrary.org/search.json?q=${encodeURIComponent(query)}&limit=100`;
+  const url = `https://openlibrary.org/search.json?q=${encodeURIComponent(query)}&limit=20`;
   const response = await fetch(url);
   if (!response.ok) {
     throw new Error('Failed to fetch books');

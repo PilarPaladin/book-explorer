@@ -1,18 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { searchBooks, getPopularBooks } from './services/api';
+import toast, { Toaster } from 'react-hot-toast';
 import { EyeIcon, HeartIcon, BookmarkIcon, EllipsisHorizontalIcon, ClockIcon, StarIcon, XMarkIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 import { EyeIcon as EyeSolid, HeartIcon as HeartSolid, BookmarkIcon as BookmarkSolid, ClockIcon as ClockSolid, StarIcon as StarSolid } from '@heroicons/react/24/solid';
 import Bookmarks from './pages/Bookmarks';
 import Readlist from './pages/Readlist';
 import Journal from './pages/Journal';
-import Books from './pages/Books';
 import Welcome from './pages/Welcome';
+import Home from './pages/Home';
+import Activity from './pages/Activity';
 import Sidebar from './components/Sidebar';
-import BookModal from './components/BookModal';
 import BookCard, { Book } from './components/BookCard';
-import LogModal from './components/LogModal';
+import SearchModal from './components/SearchModal';
 import Header from './components/Header';
 import LoadingGrid from './components/LoadingGrid';
+import Fic from './pages/Fic';
 
 
 
@@ -34,6 +36,7 @@ function App() {
         setBooks(results || []);
       } catch (err) {
         console.error("Failed to fetch initial books", err);
+        toast.error("Failed to fetch initial books");
       }
       setIsLoading(false);
     };
@@ -52,13 +55,36 @@ function App() {
     } catch (err) {
       console.error("Search failed", err);
       setBooks([]);
+      toast.error("Search failed");
     }
     setIsLoading(false);
   };
 
   return (
     <div className="app-container">
-      <Header 
+      <Toaster
+        position="bottom-center"
+        toastOptions={{
+          style: {
+            background: '#990000',
+            color: '#ffffff',
+            fontFamily: 'Inter, sans-serif',
+          },
+          success: {
+            iconTheme: {
+              primary: '#ffffff',
+              secondary: '#990000',
+            },
+          },
+          error: {
+            iconTheme: {
+              primary: '#ffffff',
+              secondary: '#990000',
+            },
+          },
+        }}
+      />
+      <Header
         setCurrentPage={setCurrentPage}
         handleSearch={handleSearch}
         searchQuery={searchQuery}
@@ -67,46 +93,31 @@ function App() {
       />
 
       {!isLoggedIn ? (
-        <Welcome />
+        <Welcome setIsLoggedIn={setIsLoggedIn} />
       ) : (
         <main className="main-content">
           <div className="left-column">
-          {currentPage === 'home' && (
-            <>
-              <h2 className="welcome-text inter-regular">
-                {displayedQuery ? `Showing matches for "${displayedQuery}"` : "Welcome back, PilarPaladin. Here's whats been popular"}
-              </h2>
+            {currentPage === 'home' && (
+                <Home
+                  displayedQuery={displayedQuery}
+                  isLoading={isLoading}
+                  books={books}
+                  setSelectedBook={(book) => { setSelectedBook(book); setCurrentPage('fic'); }}
+                />
+            )}
 
+            {currentPage === 'bookmarks' && <Bookmarks />}
+            {currentPage === 'readlist' && <Readlist />}
+            {currentPage === 'journal' && <Journal />}
+            {currentPage === 'activity' && <Activity />}
+            {currentPage === 'fic' && selectedBook && <Fic book={selectedBook} onBack={() => { setCurrentPage('home'); setSelectedBook(null); }} />}
+          </div>
 
-              {isLoading ? (
-                <LoadingGrid count={8} />
-              ) : books.length === 0 ? (
-                <div className="inter-regular" style={{ textAlign: 'center', padding: '60px 20px', fontSize: '18px', color: 'var(--color-dark)' }}>
-                  No books found. Try a different search term.
-                </div>
-              ) : (
-                <div className="book-grid">
-                  {books.map((book, index) => (
-                    <BookCard key={book.key || index} book={book} onClick={setSelectedBook} />
-                  ))}
-                </div>
-              )}
-            </>
-          )}
-
-          {currentPage === 'bookmarks' && <Bookmarks />}
-          {currentPage === 'readlist' && <Readlist />}
-          {currentPage === 'journal' && <Journal />}
-          {currentPage === 'books' && <Books />}
-        </div>
-
-        <Sidebar isLoading={isLoading} />
-      </main>
+          <Sidebar isLoading={isLoading} setCurrentPage={setCurrentPage} onBookSelect={(book) => { setSelectedBook(book); setCurrentPage('fic'); }} />
+        </main>
       )}
 
-      {selectedBook && <BookModal book={selectedBook} onClose={() => setSelectedBook(null)} />}
-
-      {isLogModalOpen && <LogModal onClose={() => setIsLogModalOpen(false)} />}
+      {isLogModalOpen && <SearchModal onClose={() => setIsLogModalOpen(false)} />}
     </div>
   );
 }

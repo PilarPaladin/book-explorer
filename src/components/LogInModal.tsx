@@ -1,12 +1,14 @@
-import React, { useEffect } from 'react';
-import { XMarkIcon } from '@heroicons/react/24/outline';
+import React, { useEffect, useState } from 'react';
+import { XMarkIcon, EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
+import toast from 'react-hot-toast';
 
 interface LogInModalProps {
     onClose: () => void;
     onSwitchToRegister: () => void;
+    onLoginSuccess?: () => void;
 }
 
-export default function LogInModal({ onClose, onSwitchToRegister }: LogInModalProps) {
+export default function LogInModal({ onClose, onSwitchToRegister, onLoginSuccess }: LogInModalProps) {
     useEffect(() => {
         const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
         document.body.style.overflow = 'hidden';
@@ -16,6 +18,44 @@ export default function LogInModal({ onClose, onSwitchToRegister }: LogInModalPr
             document.body.style.paddingRight = '0px';
         };
     }, []);
+
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
+
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        let isValid = true;
+
+        if (!email && !password) {
+            toast.error('All fields are required');
+            isValid = false;
+        } else if (!email) {
+            toast.error('Email or username is required');
+            isValid = false;
+        } else if (!password) {
+            toast.error('Password is required');
+            isValid = false;
+        }
+
+        if (isValid) {
+            const users = JSON.parse(localStorage.getItem('users') || '[]');
+
+            // Allow login with either email or username
+            const user = users.find((u: any) =>
+                (u.email === email || u.username === email) && u.password === password
+            );
+
+            if (user) {
+                localStorage.setItem('currentUser', JSON.stringify(user));
+                toast.success('Logged in successfully!');
+                onClose();
+                if (onLoginSuccess) onLoginSuccess();
+            } else {
+                toast.error('Invalid email/username or password');
+            }
+        }
+    };
 
     return (
         <div style={{
@@ -57,32 +97,62 @@ export default function LogInModal({ onClose, onSwitchToRegister }: LogInModalPr
                 </p>
 
                 {/* Form */}
-                <form style={{ display: 'flex', flexDirection: 'column', gap: '20px' }} onSubmit={(e) => e.preventDefault()}>
+                <form style={{ display: 'flex', flexDirection: 'column', gap: '20px' }} onSubmit={handleSubmit}>
 
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                         <label className="inter-regular" style={{ fontSize: '15px' }}>Email address or Username</label>
-                        <input type="text" style={{
-                            padding: '12px',
-                            borderRadius: '4px',
-                            border: 'none',
-                            backgroundColor: 'var(--color-gray)',
-                            fontSize: '16px',
-                            outline: 'none',
-                            color: 'var(--color-dark)'
-                        }} />
+                        <input
+                            type="text"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            style={{
+                                padding: '12px',
+                                borderRadius: '4px',
+                                border: 'none',
+                                backgroundColor: 'var(--color-gray)',
+                                fontSize: '16px',
+                                outline: 'none',
+                                color: 'var(--color-dark)'
+                            }}
+                        />
                     </div>
 
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', position: 'relative' }}>
                         <label className="inter-regular" style={{ fontSize: '15px' }}>Password</label>
-                        <input type="password" style={{
-                            padding: '12px',
-                            borderRadius: '4px',
-                            border: 'none',
-                            backgroundColor: 'var(--color-gray)',
-                            fontSize: '16px',
-                            outline: 'none',
-                            color: 'var(--color-dark)'
-                        }} />
+                        <input
+                            type={showPassword ? "text" : "password"}
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            style={{
+                                padding: '12px',
+                                paddingRight: '40px',
+                                borderRadius: '4px',
+                                border: 'none',
+                                backgroundColor: 'var(--color-gray)',
+                                fontSize: '16px',
+                                outline: 'none',
+                                color: 'var(--color-dark)'
+                            }}
+                        />
+                        <button
+                            type="button"
+                            onClick={() => setShowPassword(!showPassword)}
+                            style={{
+                                position: 'absolute',
+                                right: '12px',
+                                bottom: '8px',
+                                background: 'none',
+                                border: 'none',
+                                cursor: 'pointer',
+                                padding: 0
+                            }}
+                        >
+                            {showPassword ? (
+                                <EyeSlashIcon style={{ width: '20px', color: 'var(--color-dark)' }} />
+                            ) : (
+                                <EyeIcon style={{ width: '20px', color: 'var(--color-dark)' }} />
+                            )}
+                        </button>
                     </div>
 
                     <button type="submit" className="inter-bold" style={{

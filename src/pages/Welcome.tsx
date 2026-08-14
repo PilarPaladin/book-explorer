@@ -2,7 +2,11 @@ import React, { useState } from 'react';
 import SignInModal from '../components/SignInModal';
 import LogInModal from '../components/LogInModal';
 
-export default function Welcome() {
+interface WelcomeProps {
+    setIsLoggedIn: (isLoggedIn: boolean) => void;
+}
+
+export default function Welcome({ setIsLoggedIn }: WelcomeProps) {
     const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
     const [authModalType, setAuthModalType] = useState<'register' | 'login'>('register');
 
@@ -39,7 +43,7 @@ export default function Welcome() {
                         keep every kudo.<br />
                         track every ship.
                     </p>
-                    <button 
+                    <button
                         className="inter-bold"
                         onClick={() => { setIsAuthModalOpen(true); setAuthModalType('register'); }}
                         style={{
@@ -112,19 +116,33 @@ export default function Welcome() {
                         </div>
                     </div>
 
+                    {/* Block 4 */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '50px' }}>
+                        <div style={{ flex: 1 }}>
+                            <img src="/detailbannertemp.png" alt="Feature 2" style={{ width: '100%', borderRadius: '24px', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }} />
+                        </div>
+                        <div style={{ flex: 1 }}>
+                            <h3 className="rakkas-regular" style={{ fontSize: '48px', margin: '0 0 20px 0' }}>Build a personal journal</h3>
+                            <p className="inter-regular" style={{ fontSize: '20px', lineHeight: '1.5', margin: 0 }}>
+                                Track all your activity in your journal, see evrything you've interacted with.
+                            </p>
+                        </div>
+                    </div>
+
                 </div>
             </div>
 
             {isAuthModalOpen && authModalType === 'register' && (
-                <SignInModal 
-                    onClose={() => setIsAuthModalOpen(false)} 
-                    onSwitchToLogin={() => setAuthModalType('login')} 
+                <SignInModal
+                    onClose={() => setIsAuthModalOpen(false)}
+                    onSwitchToLogin={() => setAuthModalType('login')}
                 />
             )}
             {isAuthModalOpen && authModalType === 'login' && (
-                <LogInModal 
-                    onClose={() => setIsAuthModalOpen(false)} 
-                    onSwitchToRegister={() => setAuthModalType('register')} 
+                <LogInModal
+                    onClose={() => setIsAuthModalOpen(false)}
+                    onSwitchToRegister={() => setAuthModalType('register')}
+                    onLoginSuccess={() => setIsLoggedIn(true)}
                 />
             )}
         </div>

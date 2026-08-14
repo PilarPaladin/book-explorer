@@ -3,11 +3,11 @@ import { XMarkIcon } from '@heroicons/react/24/outline';
 import { searchBooks } from '../services/api';
 import { Book } from './BookCard';
 
-interface LogModalProps {
+interface SearchModalProps {
   onClose: () => void;
 }
 
-export default function LogModal({ onClose }: LogModalProps) {
+export default function SearchModal({ onClose }: SearchModalProps) {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<Book[]>([]);
   const [isSearching, setIsSearching] = useState(false);
@@ -59,18 +59,18 @@ export default function LogModal({ onClose }: LogModalProps) {
 
         {/* Header */}
         <div style={{ padding: '15px 20px', borderBottom: '1px solid var(--color-gray)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#f3f4f6', borderTopLeftRadius: '6px', borderTopRightRadius: '6px' }}>
-          <h3 className="inter-bold" style={{ margin: 0, color: 'var(--color-dark)', fontSize: '16px' }}>Add to your books...</h3>
+          <h3 className="rakkas-regular" style={{ margin: 0, color: 'var(--color-red)', fontSize: '24px' }}>Add to your Fics...</h3>
           <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
             <XMarkIcon style={{ width: '20px', color: 'var(--color-dark)' }} />
           </button>
         </div>
 
         {/* Body */}
-        <div style={{ padding: '60px 40px', display: 'flex', flexDirection: 'column', backgroundColor: 'var(--color-white)', borderBottomLeftRadius: '6px', borderBottomRightRadius: '6px' }}>
+        <div style={{ padding: '40px 40px', display: 'flex', flexDirection: 'column', backgroundColor: 'var(--color-white)', borderBottomLeftRadius: '6px', borderBottomRightRadius: '6px' }}>
           <div style={{ position: 'relative' }}>
             <input
               type="text"
-              placeholder="Search for book..."
+              placeholder="Search myArkived"
               className="inter-regular"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
