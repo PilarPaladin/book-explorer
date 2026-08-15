@@ -1,22 +1,31 @@
 import React, { useState, useEffect } from 'react';
 import { searchBooks, getPopularBooks } from './services/api';
 import toast, { Toaster } from 'react-hot-toast';
-import { EyeIcon, HeartIcon, BookmarkIcon, EllipsisHorizontalIcon, ClockIcon, StarIcon, XMarkIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline';
-import { EyeIcon as EyeSolid, HeartIcon as HeartSolid, BookmarkIcon as BookmarkSolid, ClockIcon as ClockSolid, StarIcon as StarSolid } from '@heroicons/react/24/solid';
 import Bookmarks from './pages/Bookmarks';
 import Readlist from './pages/Readlist';
 import Journal from './pages/Journal';
 import Welcome from './pages/Welcome';
 import Home from './pages/Home';
-import Activity from './pages/Activity';
+import Activity from './pages/ActivityFeed';
 import Sidebar from './components/Sidebar';
-import BookCard, { Book } from './components/BookCard';
+import { Book } from './components/BookCard';
 import SearchModal from './components/SearchModal';
 import Header from './components/Header';
-import LoadingGrid from './components/LoadingGrid';
 import Fic from './pages/Fic';
+import FinishedModal from './components/FinishedModal';
+import { useBookActivity } from './hooks/useBookActivity';
 
-
+function LogModalWrapper({ book, onClose }: { book: Book, onClose: () => void }) {
+  const { activity, updateActivity } = useBookActivity(book);
+  return (
+    <FinishedModal
+      book={book}
+      activity={activity}
+      onClose={onClose}
+      onSave={updateActivity}
+    />
+  );
+}
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false); // Simulated auth state
@@ -27,6 +36,7 @@ function App() {
   const [searchQuery, setSearchQuery] = useState('');
   const [displayedQuery, setDisplayedQuery] = useState('');
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
+  const [selectedBookToLog, setSelectedBookToLog] = useState<Book | null>(null);
 
   useEffect(() => {
     const fetchInitial = async () => {
@@ -58,6 +68,34 @@ function App() {
       toast.error("Search failed");
     }
     setIsLoading(false);
+  };
+
+  const renderPage = () => {
+    switch (currentPage) {
+      case 'home':
+        return (
+          <Home
+            displayedQuery={displayedQuery}
+            isLoading={isLoading}
+            books={books}
+            setSelectedBook={(book) => { setSelectedBook(book); setCurrentPage('fic'); }}
+          />
+        );
+      case 'bookmarks':
+        return <Bookmarks />;
+      case 'readlist':
+        return <Readlist />;
+      case 'journal':
+        return <Journal />;
+      case 'activity':
+        return <Activity />;
+      case 'fic':
+        return selectedBook ? (
+          <Fic book={selectedBook} onBack={() => { setCurrentPage('home'); setSelectedBook(null); }} />
+        ) : null;
+      default:
+        return null;
+    }
   };
 
   return (
@@ -97,27 +135,26 @@ function App() {
       ) : (
         <main className="main-content">
           <div className="left-column">
-            {currentPage === 'home' && (
-                <Home
-                  displayedQuery={displayedQuery}
-                  isLoading={isLoading}
-                  books={books}
-                  setSelectedBook={(book) => { setSelectedBook(book); setCurrentPage('fic'); }}
-                />
-            )}
-
-            {currentPage === 'bookmarks' && <Bookmarks />}
-            {currentPage === 'readlist' && <Readlist />}
-            {currentPage === 'journal' && <Journal />}
-            {currentPage === 'activity' && <Activity />}
-            {currentPage === 'fic' && selectedBook && <Fic book={selectedBook} onBack={() => { setCurrentPage('home'); setSelectedBook(null); }} />}
+            {renderPage()}
           </div>
 
           <Sidebar isLoading={isLoading} setCurrentPage={setCurrentPage} onBookSelect={(book) => { setSelectedBook(book); setCurrentPage('fic'); }} />
         </main>
       )}
 
-      {isLogModalOpen && <SearchModal onClose={() => setIsLogModalOpen(false)} />}
+      {isLogModalOpen && (
+        <SearchModal 
+          onClose={() => setIsLogModalOpen(false)} 
+          onSelectBook={(book) => setSelectedBookToLog(book)}
+        />
+      )}
+      
+      {selectedBookToLog && (
+        <LogModalWrapper 
+          book={selectedBookToLog} 
+          onClose={() => setSelectedBookToLog(null)} 
+        />
+      )}
     </div>
   );
 }

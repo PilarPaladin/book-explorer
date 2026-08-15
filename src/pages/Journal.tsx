@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { getRecentActivity, RecentActivityItem } from '../services/activityLogger';
 import { BookActivity, useBookActivity } from '../hooks/useBookActivity';
-import { PencilIcon, EllipsisHorizontalIcon, Bars3Icon } from '@heroicons/react/24/outline';
+import { PencilIcon, Bars3Icon } from '@heroicons/react/24/outline';
 import { HeartIcon as HeartSolid, StarIcon as StarSolid } from '@heroicons/react/24/solid';
 import FinishedModal from '../components/FinishedModal';
 
@@ -19,6 +19,97 @@ function EditModalWrapper({ book, onClose }: { book: any, onClose: () => void })
       onClose={onClose}
       onSave={updateActivity}
     />
+  );
+}
+
+function JournalDateBadge({ monthStr, yearStr }: { monthStr: string, yearStr: string }) {
+  return (
+    <div style={{ width: '46px', backgroundColor: 'var(--color-white)', borderRadius: '6px', overflow: 'hidden', margin: '0 auto', border: '1px solid var(--color-gray)', boxShadow: '0 2px 4px rgba(0,0,0,0.05)', marginTop: '4px' }}>
+      <div style={{ backgroundColor: 'var(--color-red)', height: '10px', position: 'relative', display: 'flex', justifyContent: 'center', gap: '6px', alignItems: 'center', borderBottom: '1px solid var(--color-gray)' }}>
+        <div style={{ width: '3px', height: '6px', backgroundColor: 'var(--color-white)', borderRadius: '1.5px', marginTop: '-4px', border: '1px solid var(--color-gray)' }}></div>
+        <div style={{ width: '3px', height: '6px', backgroundColor: 'var(--color-white)', borderRadius: '1.5px', marginTop: '-4px', border: '1px solid var(--color-gray)' }}></div>
+        <div style={{ width: '3px', height: '6px', backgroundColor: 'var(--color-white)', borderRadius: '1.5px', marginTop: '-4px', border: '1px solid var(--color-gray)' }}></div>
+      </div>
+      <div className="inter-bold" style={{ color: 'var(--color-dark)', fontSize: '13px', paddingTop: '4px', letterSpacing: '0.5px' }}>{monthStr}</div>
+      <div className="inter-bold" style={{ color: 'var(--color-dark)', fontSize: '11px', paddingBottom: '6px', opacity: 0.8 }}>{yearStr}</div>
+    </div>
+  );
+}
+
+interface JournalTableRowProps {
+  item: RecentActivityItem;
+  bookState: any;
+  showMonth: boolean;
+  dayStr: string;
+  monthStr: string;
+  yearStr: string;
+  statusText: string;
+  rating: number;
+  isLoved: boolean;
+  hasReview: boolean;
+  onBookSelect?: (book: any) => void;
+  setEditingItem: (item: { book: any, activity: any }) => void;
+}
+
+function JournalTableRow({ item, bookState, showMonth, dayStr, monthStr, yearStr, statusText, rating, isLoved, hasReview, onBookSelect, setEditingItem }: JournalTableRowProps) {
+  const coverUrl = bookState?.bookData?.cover_i
+    ? `https://covers.openlibrary.org/b/id/${bookState.bookData.cover_i}-S.jpg`
+    : '/tempCover.png';
+
+  return (
+    <tr style={{ borderBottom: '1px solid var(--color-gray)' }}>
+      <td style={{ verticalAlign: 'middle', textAlign: 'center', padding: '15px 0' }}>
+        {showMonth && <JournalDateBadge monthStr={monthStr} yearStr={yearStr} />}
+      </td>
+      <td className="inter-bold" style={{ verticalAlign: 'middle', textAlign: 'center', fontSize: '28px', color: 'var(--color-dark)', fontWeight: 'bold', opacity: 0.9 }}>
+        {dayStr}
+      </td>
+      <td style={{ verticalAlign: 'middle', padding: '20px 0', paddingLeft: '20px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+          <div style={{ width: '42px', height: '64px', border: '1px solid var(--color-gray)', borderRadius: '4px', overflow: 'hidden', flexShrink: 0, boxShadow: '0 2px 5px rgba(0,0,0,0.1)' }}>
+            <img src={coverUrl} alt={item.bookTitle} style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = '/tempCover.png'; }} />
+          </div>
+          {onBookSelect && bookState?.bookData ? (
+            <span className="rakkas-regular" style={{ cursor: 'pointer', padding: '0 5px', color: 'var(--color-red)', fontSize: '25px', fontWeight: 'bold', letterSpacing: '1.5px', textDecoration: 'underline' }} onClick={() => onBookSelect(bookState.bookData)}>
+              {item.bookTitle}
+            </span>
+          ) : (
+            <span className="rakkas-regular" style={{ padding: '0 5px', color: 'var(--color-red)', fontSize: '25px', fontWeight: 'bold', letterSpacing: '1.5px' }}>{item.bookTitle}</span>
+          )}
+        </div>
+      </td>
+      <td className="inter-bold" style={{ verticalAlign: 'middle', textAlign: 'center', fontSize: '15px', color: 'var(--color-dark)' }}>
+        {statusText}
+      </td>
+      <td style={{ verticalAlign: 'middle', textAlign: 'center' }}>
+        <div style={{ display: 'flex', justifyContent: 'center', gap: '2px' }}>
+          {[1, 2, 3, 4, 5].map(star => (
+            <StarSolid key={star} style={{ width: '18px', height: '18px', color: star <= rating ? 'var(--color-dark)' : 'var(--color-gray)' }} />
+          ))}
+        </div>
+      </td>
+      <td style={{ verticalAlign: 'middle', textAlign: 'center' }}>
+        <HeartSolid style={{ width: '20px', height: '20px', color: isLoved ? 'var(--color-red)' : 'var(--color-gray)', margin: '0 auto' }} />
+      </td>
+      <td style={{ verticalAlign: 'middle', textAlign: 'center' }}>
+        {/* Blank rewatch cell */}
+      </td>
+      <td style={{ verticalAlign: 'middle', textAlign: 'center' }}>
+        <Bars3Icon style={{ width: '24px', height: '24px', color: hasReview ? 'var(--color-dark)' : 'transparent', margin: '0 auto' }} />
+      </td>
+      <td style={{ verticalAlign: 'middle', textAlign: 'center' }}>
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '10px', color: 'var(--color-dark)' }}>
+          <PencilIcon 
+            style={{ width: '18px', height: '18px', cursor: 'pointer' }} 
+            onClick={() => {
+              if (bookState?.bookData) {
+                setEditingItem({ book: bookState.bookData, activity: bookState });
+              }
+            }}
+          />
+        </div>
+      </td>
+    </tr>
   );
 }
 
@@ -54,7 +145,7 @@ export default function Journal({ onBookSelect }: JournalProps) {
       if (stored) {
         try {
           setUserActivity(JSON.parse(stored));
-        } catch (e) { }
+        } catch { }
       }
     };
 
@@ -114,10 +205,6 @@ export default function Journal({ onBookSelect }: JournalProps) {
               const showMonth = !prevDate || prevDate.getMonth() !== date.getMonth() || prevDate.getFullYear() !== date.getFullYear();
 
               const bookState = userActivity[item.bookKey];
-              const coverUrl = bookState?.bookData?.cover_i
-                ? `https://covers.openlibrary.org/b/id/${bookState.bookData.cover_i}-S.jpg`
-                : '/tempCover.png';
-
               let statusText = 'Finished';
               if (item.actions.includes('Started')) statusText = 'Started';
               else if (item.actions.includes('Finished') || item.actions.includes('Read')) statusText = 'Finished';
@@ -127,69 +214,21 @@ export default function Journal({ onBookSelect }: JournalProps) {
               const hasReview = !!bookState?.review;
 
               return (
-                <tr key={item.id} style={{ borderBottom: '1px solid var(--color-gray)' }}>
-                  <td style={{ verticalAlign: 'middle', textAlign: 'center', padding: '15px 0' }}>
-                    {showMonth && (
-                      <div style={{ width: '46px', backgroundColor: 'var(--color-white)', borderRadius: '6px', overflow: 'hidden', margin: '0 auto', border: '1px solid var(--color-gray)', boxShadow: '0 2px 4px rgba(0,0,0,0.05)', marginTop: '4px' }}>
-                        <div style={{ backgroundColor: 'var(--color-red)', height: '10px', position: 'relative', display: 'flex', justifyContent: 'center', gap: '6px', alignItems: 'center', borderBottom: '1px solid var(--color-gray)' }}>
-                          <div style={{ width: '3px', height: '6px', backgroundColor: 'var(--color-white)', borderRadius: '1.5px', marginTop: '-4px', border: '1px solid var(--color-gray)' }}></div>
-                          <div style={{ width: '3px', height: '6px', backgroundColor: 'var(--color-white)', borderRadius: '1.5px', marginTop: '-4px', border: '1px solid var(--color-gray)' }}></div>
-                          <div style={{ width: '3px', height: '6px', backgroundColor: 'var(--color-white)', borderRadius: '1.5px', marginTop: '-4px', border: '1px solid var(--color-gray)' }}></div>
-                        </div>
-                        <div className="inter-bold" style={{ color: 'var(--color-dark)', fontSize: '13px', paddingTop: '4px', letterSpacing: '0.5px' }}>{monthStr}</div>
-                        <div className="inter-bold" style={{ color: 'var(--color-dark)', fontSize: '11px', paddingBottom: '6px', opacity: 0.8 }}>{yearStr}</div>
-                      </div>
-                    )}
-                  </td>
-                  <td className="inter-bold" style={{ verticalAlign: 'middle', textAlign: 'center', fontSize: '28px', color: 'var(--color-dark)', fontWeight: 'bold', opacity: 0.9 }}>
-                    {dayStr}
-                  </td>
-                  <td style={{ verticalAlign: 'middle', padding: '20px 0', paddingLeft: '20px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-                      <div style={{ width: '42px', height: '64px', border: '1px solid var(--color-gray)', borderRadius: '4px', overflow: 'hidden', flexShrink: 0, boxShadow: '0 2px 5px rgba(0,0,0,0.1)' }}>
-                        <img src={coverUrl} alt={item.bookTitle} style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = '/tempCover.png'; }} />
-                      </div>
-                      {onBookSelect && bookState?.bookData ? (
-                        <span className="rakkas-regular" style={{ cursor: 'pointer', padding: '0 5px', color: 'var(--color-red)', fontSize: '25px', fontWeight: 'bold', letterSpacing: '1.5px', textDecoration: 'underline' }} onClick={() => onBookSelect(bookState.bookData)}>
-                          {item.bookTitle}
-                        </span>
-                      ) : (
-                        <span className="rakkas-regular" style={{ padding: '0 5px', color: 'var(--color-red)', fontSize: '25px', fontWeight: 'bold', letterSpacing: '1.5px' }}>{item.bookTitle}</span>
-                      )}
-                    </div>
-                  </td>
-                  <td className="inter-bold" style={{ verticalAlign: 'middle', textAlign: 'center', fontSize: '15px', color: 'var(--color-dark)' }}>
-                    {statusText}
-                  </td>
-                  <td style={{ verticalAlign: 'middle', textAlign: 'center' }}>
-                    <div style={{ display: 'flex', justifyContent: 'center', gap: '2px' }}>
-                      {[1, 2, 3, 4, 5].map(star => (
-                        <StarSolid key={star} style={{ width: '18px', height: '18px', color: star <= rating ? 'var(--color-dark)' : 'var(--color-gray)' }} />
-                      ))}
-                    </div>
-                  </td>
-                  <td style={{ verticalAlign: 'middle', textAlign: 'center' }}>
-                    <HeartSolid style={{ width: '20px', height: '20px', color: isLoved ? 'var(--color-red)' : 'var(--color-gray)', margin: '0 auto' }} />
-                  </td>
-                  <td style={{ verticalAlign: 'middle', textAlign: 'center' }}>
-                    {/* Blank rewatch cell */}
-                  </td>
-                  <td style={{ verticalAlign: 'middle', textAlign: 'center' }}>
-                    <Bars3Icon style={{ width: '24px', height: '24px', color: hasReview ? 'var(--color-dark)' : 'transparent', margin: '0 auto' }} />
-                  </td>
-                  <td style={{ verticalAlign: 'middle', textAlign: 'center' }}>
-                    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '10px', color: 'var(--color-dark)' }}>
-                      <PencilIcon 
-                        style={{ width: '18px', height: '18px', cursor: 'pointer' }} 
-                        onClick={() => {
-                          if (bookState?.bookData) {
-                            setEditingItem({ book: bookState.bookData, activity: bookState });
-                          }
-                        }}
-                      />
-                    </div>
-                  </td>
-                </tr>
+                <JournalTableRow 
+                  key={item.id}
+                  item={item}
+                  bookState={bookState}
+                  showMonth={showMonth}
+                  dayStr={dayStr}
+                  monthStr={monthStr}
+                  yearStr={yearStr}
+                  statusText={statusText}
+                  rating={rating}
+                  isLoved={isLoved}
+                  hasReview={hasReview}
+                  onBookSelect={onBookSelect}
+                  setEditingItem={setEditingItem}
+                />
               );
             })
           )}

@@ -5,6 +5,16 @@ interface BookmarkModalProps {
   onSave: (chapter: string, page: string, notes: string) => void;
 }
 
+const inputStyles: React.CSSProperties = {
+  backgroundColor: 'var(--color-gray)',
+  border: 'none',
+  borderRadius: '6px',
+  padding: '12px 15px',
+  fontSize: '18px',
+  outline: 'none',
+  color: '#374151'
+};
+
 export default function BookmarkModal({
   onClose,
   onSave
@@ -65,15 +75,7 @@ export default function BookmarkModal({
               value={chapter}
               onChange={(e) => setChapter(e.target.value.replace(/\D/g, ''))}
               className="inter-regular"
-              style={{
-                backgroundColor: 'var(--color-gray)',
-                border: 'none',
-                borderRadius: '6px',
-                padding: '12px 15px',
-                fontSize: '18px',
-                outline: 'none',
-                color: '#374151'
-              }}
+              style={inputStyles}
             />
           </div>
 
@@ -86,15 +88,7 @@ export default function BookmarkModal({
               value={page}
               onChange={(e) => setPage(e.target.value.replace(/\D/g, ''))}
               className="inter-regular"
-              style={{
-                backgroundColor: 'var(--color-gray)',
-                border: 'none',
-                borderRadius: '6px',
-                padding: '12px 15px',
-                fontSize: '18px',
-                outline: 'none',
-                color: '#374151'
-              }}
+              style={inputStyles}
             />
           </div>
 
@@ -106,17 +100,7 @@ export default function BookmarkModal({
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               className="inter-regular"
-              style={{
-                backgroundColor: 'var(--color-gray)',
-                border: 'none',
-                borderRadius: '6px',
-                padding: '12px 15px',
-                fontSize: '18px',
-                outline: 'none',
-                color: '#374151',
-                resize: 'vertical',
-                minHeight: '80px'
-              }}
+              style={{ ...inputStyles, resize: 'vertical', minHeight: '80px' }}
             />
           </div>
 

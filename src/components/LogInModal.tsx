@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { XMarkIcon, EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
+import { useScrollLock } from '../hooks/useScrollLock';
 
 interface LogInModalProps {
     onClose: () => void;
@@ -8,16 +9,47 @@ interface LogInModalProps {
     onLoginSuccess?: () => void;
 }
 
+const authModalOverlayStyle: React.CSSProperties = {
+    position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+    backgroundColor: 'rgba(0,0,0,0.7)', display: 'flex',
+    justifyContent: 'center', alignItems: 'center', zIndex: 3000
+};
+
+const authModalContainerStyle: React.CSSProperties = {
+    backgroundColor: 'var(--color-white)',
+    borderRadius: '6px',
+    width: '450px',
+    boxShadow: '0 10px 30px rgba(0,0,0,0.5)',
+    padding: '30px',
+    color: 'var(--color-red)',
+    position: 'relative'
+};
+
+const authInputStyle: React.CSSProperties = {
+    padding: '12px',
+    borderRadius: '4px',
+    border: 'none',
+    backgroundColor: 'var(--color-gray)',
+    fontSize: '16px',
+    outline: 'none',
+    color: 'var(--color-dark)'
+};
+
+const authSubmitButtonStyle: React.CSSProperties = {
+    marginTop: '20px',
+    backgroundColor: 'var(--color-red)',
+    color: 'var(--color-white)',
+    border: 'none',
+    borderRadius: '4px',
+    padding: '14px',
+    fontSize: '16px',
+    letterSpacing: '1px',
+    cursor: 'pointer',
+    textTransform: 'uppercase'
+};
+
 export default function LogInModal({ onClose, onSwitchToRegister, onLoginSuccess }: LogInModalProps) {
-    useEffect(() => {
-        const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
-        document.body.style.overflow = 'hidden';
-        document.body.style.paddingRight = `${scrollbarWidth}px`;
-        return () => {
-            document.body.style.overflow = 'unset';
-            document.body.style.paddingRight = '0px';
-        };
-    }, []);
+    useScrollLock();
 
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -58,22 +90,10 @@ export default function LogInModal({ onClose, onSwitchToRegister, onLoginSuccess
     };
 
     return (
-        <div style={{
-            position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-            backgroundColor: 'rgba(0,0,0,0.7)', display: 'flex',
-            justifyContent: 'center', alignItems: 'center', zIndex: 3000
-        }} onClick={onClose}>
+        <div style={authModalOverlayStyle} onClick={onClose}>
 
             {/* Modal Container */}
-            <div style={{
-                backgroundColor: 'var(--color-white)',
-                borderRadius: '6px',
-                width: '450px',
-                boxShadow: '0 10px 30px rgba(0,0,0,0.5)',
-                padding: '30px',
-                color: 'var(--color-red)',
-                position: 'relative'
-            }} onClick={e => e.stopPropagation()}>
+            <div style={authModalContainerStyle} onClick={e => e.stopPropagation()}>
 
                 {/* Close Button */}
                 <button onClick={onClose} style={{
@@ -105,15 +125,7 @@ export default function LogInModal({ onClose, onSwitchToRegister, onLoginSuccess
                             type="text"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
-                            style={{
-                                padding: '12px',
-                                borderRadius: '4px',
-                                border: 'none',
-                                backgroundColor: 'var(--color-gray)',
-                                fontSize: '16px',
-                                outline: 'none',
-                                color: 'var(--color-dark)'
-                            }}
+                            style={authInputStyle}
                         />
                     </div>
 
@@ -123,16 +135,7 @@ export default function LogInModal({ onClose, onSwitchToRegister, onLoginSuccess
                             type={showPassword ? "text" : "password"}
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
-                            style={{
-                                padding: '12px',
-                                paddingRight: '40px',
-                                borderRadius: '4px',
-                                border: 'none',
-                                backgroundColor: 'var(--color-gray)',
-                                fontSize: '16px',
-                                outline: 'none',
-                                color: 'var(--color-dark)'
-                            }}
+                            style={{ ...authInputStyle, paddingRight: '40px' }}
                         />
                         <button
                             type="button"
@@ -155,18 +158,7 @@ export default function LogInModal({ onClose, onSwitchToRegister, onLoginSuccess
                         </button>
                     </div>
 
-                    <button type="submit" className="inter-bold" style={{
-                        marginTop: '20px',
-                        backgroundColor: 'var(--color-red)',
-                        color: 'var(--color-white)',
-                        border: 'none',
-                        borderRadius: '4px',
-                        padding: '14px',
-                        fontSize: '16px',
-                        letterSpacing: '1px',
-                        cursor: 'pointer',
-                        textTransform: 'uppercase'
-                    }}>
+                    <button type="submit" className="inter-bold" style={authSubmitButtonStyle}>
                         Log In
                     </button>
                 </form>

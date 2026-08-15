@@ -6,6 +6,29 @@ interface WelcomeProps {
     setIsLoggedIn: (isLoggedIn: boolean) => void;
 }
 
+interface FeatureBlockProps {
+    title: string;
+    description: React.ReactNode;
+    imageSrc: string;
+    imageLeft?: boolean;
+}
+
+function FeatureBlock({ title, description, imageSrc, imageLeft = false }: FeatureBlockProps) {
+    return (
+        <div style={{ display: 'flex', alignItems: 'center', gap: '50px', flexDirection: imageLeft ? 'row-reverse' : 'row' }}>
+            <div style={{ flex: 1 }}>
+                <h3 className="rakkas-regular" style={{ fontSize: '48px', margin: '0 0 20px 0' }}>{title}</h3>
+                <p className="inter-regular" style={{ fontSize: '20px', lineHeight: '1.5', margin: 0 }}>
+                    {description}
+                </p>
+            </div>
+            <div style={{ flex: 1 }}>
+                <img src={imageSrc} alt={title} style={{ width: '100%', borderRadius: '24px', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }} />
+            </div>
+        </div>
+    );
+}
+
 export default function Welcome({ setIsLoggedIn }: WelcomeProps) {
     const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
     const [authModalType, setAuthModalType] = useState<'register' | 'login'>('register');
@@ -76,58 +99,32 @@ export default function Welcome({ setIsLoggedIn }: WelcomeProps) {
                 </p>
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '80px' }}>
+                    
+                    <FeatureBlock 
+                        title="Log what you've read"
+                        description="Get your myArkived underway by visiting our All section or pasting an AO3 link to log a few fics you've read. Click the 👁️ on any Fic poster to tell us you've read it (add a ❤️ if you loved it and/or a star rating). We add all logged titles to your profile."
+                        imageSrc="/detailbannertemp.png"
+                    />
 
-                    {/* Block 1 */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '50px' }}>
-                        <div style={{ flex: 1 }}>
-                            <h3 className="rakkas-regular" style={{ fontSize: '48px', margin: '0 0 20px 0' }}>Log what you've read</h3>
-                            <p className="inter-regular" style={{ fontSize: '20px', lineHeight: '1.5', margin: 0 }}>
-                                Get your myArkived underway by visiting our All section or pasting an AO3 link to log a few fics you've read. Click the 👁️ on any Fic poster to tell us you've read it (add a ❤️ if you loved it and/or a star rating). We add all logged titles to your profile.
-                            </p>
-                        </div>
-                        <div style={{ flex: 1 }}>
-                            <img src="/detailbannertemp.png" alt="Feature 1" style={{ width: '100%', borderRadius: '24px', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }} />
-                        </div>
-                    </div>
+                    <FeatureBlock 
+                        title="Browse fics across fandoms"
+                        description="You can find your logged fics in the tab of your profile. As you add more content, your profile starts to reflect your taste. You can also browse the fics uploaded by the community."
+                        imageSrc="/detailbannertemp.png"
+                        imageLeft={true}
+                    />
 
-                    {/* Block 2 */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '50px' }}>
-                        <div style={{ flex: 1 }}>
-                            <img src="/detailbannertemp.png" alt="Feature 2" style={{ width: '100%', borderRadius: '24px', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }} />
-                        </div>
-                        <div style={{ flex: 1 }}>
-                            <h3 className="rakkas-regular" style={{ fontSize: '48px', margin: '0 0 20px 0' }}>Browse fics across fandoms</h3>
-                            <p className="inter-regular" style={{ fontSize: '20px', lineHeight: '1.5', margin: 0 }}>
-                                You can find your logged fics in the tab of your profile. As you add more content, your profile starts to reflect your taste. You can also browse the fics uploaded by the community.
-                            </p>
-                        </div>
-                    </div>
+                    <FeatureBlock 
+                        title="Save fics to read later"
+                        description="The watchlist, lets you keep a list of fics you want to start reading in the future."
+                        imageSrc="/detailbannertemp.png"
+                    />
 
-                    {/* Block 3 */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '50px' }}>
-                        <div style={{ flex: 1 }}>
-                            <h3 className="rakkas-regular" style={{ fontSize: '48px', margin: '0 0 20px 0' }}>Save fics to read later</h3>
-                            <p className="inter-regular" style={{ fontSize: '20px', lineHeight: '1.5', margin: 0 }}>
-                                The watchlist, lets you keep a list of fics you want to start reading in the future.
-                            </p>
-                        </div>
-                        <div style={{ flex: 1 }}>
-                            <img src="/detailbannertemp.png" alt="Feature 3" style={{ width: '100%', borderRadius: '24px', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }} />
-                        </div>
-                    </div>
-
-                    {/* Block 4 */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '50px' }}>
-                        <div style={{ flex: 1 }}>
-                            <img src="/detailbannertemp.png" alt="Feature 2" style={{ width: '100%', borderRadius: '24px', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }} />
-                        </div>
-                        <div style={{ flex: 1 }}>
-                            <h3 className="rakkas-regular" style={{ fontSize: '48px', margin: '0 0 20px 0' }}>Build a personal journal</h3>
-                            <p className="inter-regular" style={{ fontSize: '20px', lineHeight: '1.5', margin: 0 }}>
-                                Track all your activity in your journal, see evrything you've interacted with.
-                            </p>
-                        </div>
-                    </div>
+                    <FeatureBlock 
+                        title="Build a personal journal"
+                        description="Track all your activity in your journal, see evrything you've interacted with."
+                        imageSrc="/detailbannertemp.png"
+                        imageLeft={true}
+                    />
 
                 </div>
             </div>

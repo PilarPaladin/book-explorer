@@ -1,6 +1,6 @@
 import React from 'react';
-import { EyeIcon, BookmarkIcon, EllipsisHorizontalIcon, ClockIcon } from '@heroicons/react/24/outline';
-import { EyeIcon as EyeSolid, BookmarkIcon as BookmarkSolid, ClockIcon as ClockSolid } from '@heroicons/react/24/solid';
+import { EyeIcon, EllipsisHorizontalIcon, ClockIcon } from '@heroicons/react/24/outline';
+import { EyeIcon as EyeSolid, ClockIcon as ClockSolid } from '@heroicons/react/24/solid';
 import { useBookActivity } from '../hooks/useBookActivity';
 
 export interface Book {
@@ -25,8 +25,6 @@ export default function BookCard({ book, onClick }: BookCardProps) {
   const coverUrl = book.cover_i
     ? `https://covers.openlibrary.org/b/id/${book.cover_i}-M.jpg`
     : '/tempCover.png';
-
-  const author = book.author_name ? `by ${book.author_name[0]}` : 'Unknown Author';
 
   return (
     <div className="book-card" onClick={() => onClick(book)} style={{ cursor: 'pointer' }}>

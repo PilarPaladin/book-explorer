@@ -1,8 +1,6 @@
 import React from 'react';
 
-interface BookmarksProps {}
-
-export default function Bookmarks(props: BookmarksProps) {
+export default function Bookmarks() {
   return (
     <div style={{ padding: '50px', textAlign: 'center' }}>
       <h2 className="inter-bold" style={{ fontSize: '32px', color: 'var(--color-dark)' }}>Bookmarks</h2>

@@ -22,14 +22,14 @@ export default function Sidebar({ isLoading, setCurrentPage, onBookSelect }: Sid
     if (stored) {
       try {
         setUserActivity(JSON.parse(stored));
-      } catch(e) {}
+      } catch {}
     }
 
     const storedUser = localStorage.getItem('currentUser');
     if (storedUser) {
       try {
         setCurrentUser(JSON.parse(storedUser));
-      } catch(e) {}
+      } catch {}
     }
 
     const handleRecent = () => setRecentActivity(getRecentActivity());
@@ -38,7 +38,7 @@ export default function Sidebar({ isLoading, setCurrentPage, onBookSelect }: Sid
       if (updated) {
         try {
           setUserActivity(JSON.parse(updated));
-        } catch (e) {}
+        } catch {}
       }
     };
 
