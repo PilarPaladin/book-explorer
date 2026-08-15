@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { EyeIcon, EllipsisHorizontalIcon, ClockIcon } from '@heroicons/react/24/outline';
 import { EyeIcon as EyeSolid, ClockIcon as ClockSolid } from '@heroicons/react/24/solid';
 import { useBookActivity } from '../hooks/useBookActivity';

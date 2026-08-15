@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { getRecentActivity, RecentActivityItem } from '../services/activityLogger';
 import { getRelativeTimeStrict } from '../utils/timeFormat';
 import { Book } from './BookCard';

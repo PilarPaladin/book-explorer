@@ -1,4 +1,4 @@
-import React from 'react';
+
 import LoadingGrid from '../components/LoadingGrid';
 import BookCard, { Book } from '../components/BookCard';
 

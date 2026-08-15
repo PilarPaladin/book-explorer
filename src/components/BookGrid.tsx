@@ -1,4 +1,4 @@
-import React from 'react';
+
 import BookCard, { Book } from './BookCard';
 
 interface BookGridProps {
