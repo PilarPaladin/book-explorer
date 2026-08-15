@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-interface BookmarkModalProps {
+interface AddBookmarkModalProps {
   onClose: () => void;
   onSave: (chapter: string, page: string, notes: string) => void;
 }
@@ -15,10 +15,10 @@ const inputStyles: React.CSSProperties = {
   color: '#374151'
 };
 
-export default function BookmarkModal({
+export default function AddBookmarkModal({
   onClose,
   onSave
-}: BookmarkModalProps) {
+}: AddBookmarkModalProps) {
   const [chapter, setChapter] = useState('');
   const [page, setPage] = useState('');
   const [notes, setNotes] = useState('');

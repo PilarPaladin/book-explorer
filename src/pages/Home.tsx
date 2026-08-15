@@ -3,13 +3,12 @@ import LoadingGrid from '../components/LoadingGrid';
 import BookCard, { Book } from '../components/BookCard';
 
 interface HomeProps {
-    displayedQuery: string;
     isLoading: boolean;
     books: Book[];
     setSelectedBook: (book: Book | null) => void;
 }
 
-export default function Home({ displayedQuery, isLoading, books, setSelectedBook }: HomeProps) {
+export default function Home({ isLoading, books, setSelectedBook }: HomeProps) {
     const [username, setUsername] = useState('Reader');
 
     useEffect(() => {
@@ -29,7 +28,7 @@ export default function Home({ displayedQuery, isLoading, books, setSelectedBook
     return (
         <>
             <h2 className="rakkas-regular" style={{ fontSize: 'clamp(28px, 6vw, 42px)', color: '#990000', margin: '0 0 30px 0' }}>
-                {displayedQuery ? `Showing matches for "${displayedQuery}"` : `Welcome back, ${username}. Here's what's been happening...`}
+                Welcome back, {username}. Here's what's been happening...
             </h2>
 
             {isLoading ? (

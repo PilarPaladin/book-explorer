@@ -59,7 +59,7 @@ function JournalTableRow({ data, onBookSelect, setEditingItem }: JournalTableRow
       <td style={{ verticalAlign: 'middle', padding: '20px 0', paddingLeft: '20px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
           <div style={{ width: '42px', height: '64px', border: '1px solid var(--color-gray)', borderRadius: '4px', overflow: 'hidden', flexShrink: 0, boxShadow: '0 2px 5px rgba(0,0,0,0.1)' }}>
-            <img src={coverUrl} alt={item.bookTitle} style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = '/tempCover.png'; }} />
+            <img src={coverUrl} alt={item.bookTitle} style={{ width: '100%', height: '100%', objectFit: 'cover', backgroundImage: "url('/tempCover.png')", backgroundSize: 'cover', backgroundPosition: 'center' }} onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = '/tempCover.png'; }} />
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', padding: '0 5px', alignItems: 'flex-start', justifyContent: 'center' }}>
             {onBookSelect && bookState?.bookData ? (
@@ -184,9 +184,9 @@ export default function Journal({ onBookSelect }: JournalProps) {
   });
 
   return (
-    <div style={{ padding: '0px 0px', maxWidth: '1000px', margin: '0 auto', width: '100%' }}>
+    <div style={{ width: '100%' }}>
       <div className="journal-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', borderBottom: '2px solid var(--color-red)', paddingBottom: '10px', marginBottom: '20px' }}>
-        <h2 className="rakkas-regular" style={{ fontSize: '42px', color: 'var(--color-red)', margin: 0 }}>
+        <h2 className="rakkas-regular" style={{ fontSize: 'clamp(28px, 6vw, 42px)', color: '#990000', margin: '0 0 5px 0' }}>
           My Journal
         </h2>
       </div>
@@ -247,7 +247,7 @@ export default function Journal({ onBookSelect }: JournalProps) {
                     {parseInt(dayStr, 10)}
                   </div>
                   <div style={{ width: '40px', height: '60px', flexShrink: 0, border: '1px solid #d1d5db', borderRadius: '4px', overflow: 'hidden' }}>
-                    <img src={coverUrl} alt={item.bookTitle} style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = '/tempCover.png'; }} />
+                    <img src={coverUrl} alt={item.bookTitle} style={{ width: '100%', height: '100%', objectFit: 'cover', backgroundImage: "url('/tempCover.png')", backgroundSize: 'cover', backgroundPosition: 'center' }} onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = '/tempCover.png'; }} />
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', flexGrow: 1 }}>
                     <div style={{ display: 'flex', alignItems: 'baseline', gap: '6px', flexWrap: 'wrap' }}>

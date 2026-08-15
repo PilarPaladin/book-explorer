@@ -6,11 +6,12 @@ import { useScrollLock } from '../hooks/useScrollLock';
 interface SignUpModalProps {
     onClose: () => void;
     onSwitchToLogin: () => void;
+    onGuestLogin?: () => void;
 }
 
 
 
-export default function SignUpModal({ onClose, onSwitchToLogin }: SignUpModalProps) {
+export default function SignUpModal({ onClose, onSwitchToLogin, onGuestLogin }: SignUpModalProps) {
     useScrollLock();
 
     const [email, setEmail] = useState('');
@@ -133,6 +134,9 @@ export default function SignUpModal({ onClose, onSwitchToLogin }: SignUpModalPro
                     <button type="submit" className="auth-btn inter-bold">
                         Create Account
                     </button>
+                    <p className="inter-regular" style={{ textDecoration: 'underline', textAlign: 'center', margin: '0', cursor: 'pointer', color: 'var(--color-dark)' }} onClick={onGuestLogin}>
+                        Browse myArkive as guest
+                    </p>
                 </form>
             </div>
         </div>

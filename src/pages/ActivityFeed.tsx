@@ -58,7 +58,7 @@ function ActivityFeedItem({ item, userActivity, onBookSelect, verbsText, suffix,
         <div style={{ borderBottom: '1px solid var(--color-gray)', padding: '15px 0' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                 <div className="inter-regular" style={{ color: 'var(--color-dark)', fontSize: '15px' }}>
-                    You {verbsText}{suffix ? ` ${suffix}` : ''}
+                    You {verbsText}{hasReview && suffix ? ` ${suffix}` : ''}
                     {!hasReview ? (
                         <>
                             {' '}
@@ -73,6 +73,7 @@ function ActivityFeedItem({ item, userActivity, onBookSelect, verbsText, suffix,
                                 <strong style={{ color: 'var(--color-red)', fontWeight: 'bold' }}>{item.bookTitle}</strong>
                             )}
                             {item.isReread ? ' again' : ''}
+                            {!hasReview && suffix ? ` ${suffix}` : ''}
                             {item.rating ? (
                                 <span style={{ marginLeft: '6px', color: 'var(--color-dark)', fontSize: '12px', verticalAlign: 'middle', display: 'inline-flex', gap: '1px' }}>
                                     {[...Array(Math.max(0, Math.floor(Number(item.rating) || 0)))].map((_, i) => <StarSolid key={i} style={{ width: '13px' }} />)}
@@ -148,9 +149,9 @@ export default function ActivityFeed({ onBookSelect }: ActivityFeedProps) {
     }, []);
 
     return (
-        <div style={{ padding: '0px 0px', maxWidth: '1000px', margin: '0 auto', width: '100%' }}>
+        <div style={{ width: '100%' }}>
             <div style={{ borderBottom: '2px solid var(--color-red)', paddingBottom: '10px', marginBottom: '20px' }}>
-                <h2 className="rakkas-regular" style={{ fontSize: '42px', color: '#990000', margin: 0 }}>
+                <h2 className="rakkas-regular" style={{ fontSize: 'clamp(28px, 6vw, 42px)', color: '#990000', margin: '0 0 5px 0' }}>
                     My Activity
                 </h2>
             </div>

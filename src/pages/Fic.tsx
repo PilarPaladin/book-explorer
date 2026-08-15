@@ -3,9 +3,10 @@ import { EyeIcon, HeartIcon, BookmarkIcon, ClockIcon, ArrowLeftIcon } from '@her
 import { EyeIcon as EyeSolid, HeartIcon as HeartSolid, BookmarkIcon as BookmarkSolid, ClockIcon as ClockSolid, StarIcon as StarSolid } from '@heroicons/react/24/solid';
 import { Book } from '../components/BookCard';
 import { useBookActivity } from '../hooks/useBookActivity';
-import BookmarkModal from '../components/BookmarkModal';
+import AddBookmarkModal from '../components/AddBookmarkModal';
 import FinishedModal from '../components/FinishedModal';
 import StarRating from '../components/StarRating';
+import { getBookDetails } from '../services/api';
 
 interface FicProps {
   book: Book;
@@ -20,9 +21,31 @@ export default function Fic({ book, onBack }: FicProps) {
   const [isBookmarkModalOpen, setIsBookmarkModalOpen] = useState(false);
   const [isFinishedModalOpen, setIsFinishedModalOpen] = useState(false);
   const [isSynopsisExpanded, setIsSynopsisExpanded] = useState(false);
+  const [synopsis, setSynopsis] = useState<string | null>(null);
+  const [isLoadingSynopsis, setIsLoadingSynopsis] = useState(false);
 
   useEffect(() => {
     setImgLoaded(false);
+    setSynopsis(null);
+    setIsSynopsisExpanded(false);
+    const fetchSynopsis = async () => {
+      if (!book.key) return;
+      setIsLoadingSynopsis(true);
+      try {
+        const details = await getBookDetails(book.key);
+        if (details.description) {
+          const desc = typeof details.description === 'string' ? details.description : details.description.value;
+          setSynopsis(desc);
+        } else {
+          setSynopsis("No synopsis available for this book.");
+        }
+      } catch (e) {
+        console.error("Failed to fetch synopsis", e);
+        setSynopsis("Failed to load synopsis.");
+      }
+      setIsLoadingSynopsis(false);
+    };
+    fetchSynopsis();
   }, [book]);
 
   const coverUrl = book.cover_i
@@ -94,13 +117,14 @@ export default function Fic({ book, onBack }: FicProps) {
           </div>
 
           {/* Synopsis */}
-          <div className="fic-synopsis-block" style={{ marginTop: '25px', paddingRight: '20px' }}>
+          <div className="fic-synopsis-block" style={{ marginTop: '25px', paddingRight: '20px', whiteSpace: 'pre-wrap' }}>
             <h3 className="inter-bold" style={{ fontSize: '16px', marginBottom: '10px' }}>Synopsis:</h3>
             <p className="inter-regular" style={{ fontSize: '16px', color: '#475569', lineHeight: '1.6', margin: 0 }}>
               {(() => {
-                const synopsisText = (book as any).description || "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.";
-                const isLongSynopsis = synopsisText.length > 150;
-                const displaySynopsis = (isSynopsisExpanded || !isLongSynopsis) ? synopsisText : `${synopsisText.slice(0, 150)}...`;
+                if (isLoadingSynopsis) return "Loading synopsis...";
+                const synopsisText = synopsis || "No synopsis available for this book.";
+                const isLongSynopsis = synopsisText.length > 250;
+                const displaySynopsis = (isSynopsisExpanded || !isLongSynopsis) ? synopsisText : `${synopsisText.slice(0, 250)}...`;
                 return (
                   <>
                     {displaySynopsis}
@@ -160,13 +184,19 @@ export default function Fic({ book, onBack }: FicProps) {
       </div>
 
       {isBookmarkModalOpen && (
-        <BookmarkModal
+        <AddBookmarkModal
           onClose={() => setIsBookmarkModalOpen(false)}
           onSave={(chapter, page, notes) => {
             const currentBookmarks = activity.bookmarks || [];
             updateActivity({
               isBookmarked: true,
-              bookmarks: [...currentBookmarks, { chapter, page, notes }]
+              bookmarks: [...currentBookmarks, { 
+                id: Date.now().toString(),
+                chapter, 
+                page, 
+                notes,
+                date: new Date().toISOString().split('T')[0] // 'YYYY-MM-DD'
+              }]
             });
             setIsBookmarkModalOpen(false);
           }}

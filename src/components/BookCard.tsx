@@ -1,7 +1,5 @@
-
-import { EyeIcon, EllipsisHorizontalIcon, ClockIcon } from '@heroicons/react/24/outline';
-import { EyeIcon as EyeSolid, ClockIcon as ClockSolid } from '@heroicons/react/24/solid';
 import { useBookActivity } from '../hooks/useBookActivity';
+import BookRibbon from './BookRibbon';
 
 export interface Book {
   cover_i?: number;
@@ -14,10 +12,12 @@ export interface Book {
 
 interface BookCardProps {
   book: Book;
-  onClick: (book: Book) => void;
+  onClick?: (book: Book) => void;
+  onOpenFic?: (book: Book) => void;
+  badgeCount?: number;
 }
 
-export default function BookCard({ book, onClick }: BookCardProps) {
+export default function BookCard({ book, onClick, onOpenFic, badgeCount }: BookCardProps) {
   const { activity, updateActivity } = useBookActivity(book);
   const { isRead, inReadlist } = activity;
 
@@ -27,8 +27,11 @@ export default function BookCard({ book, onClick }: BookCardProps) {
     : '/tempCover.png';
 
   return (
-    <div className="book-card" onClick={() => onClick(book)} style={{ cursor: 'pointer' }}>
+    <div className="book-card" onClick={onClick ? () => onClick(book) : undefined} style={{ cursor: onClick ? 'pointer' : 'default' }}>
       <div className="book-cover-container">
+        {badgeCount && badgeCount > 0 && (
+          <div className="bookmark-badge-count">{badgeCount}</div>
+        )}
         <img
           src={coverUrl}
           alt={book.title}
@@ -36,27 +39,26 @@ export default function BookCard({ book, onClick }: BookCardProps) {
           onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = '/tempCover.png'; }}
         />
 
-        <div className="book-ribbon" onClick={(e) => e.stopPropagation()}>
-          <span className="action-icon dark-icon" title="More options" onClick={() => onClick(book)} style={{ marginBottom: '-7px' }} >
-            <EllipsisHorizontalIcon style={{ width: '20px', height: '20px' }} strokeWidth={2} />
-          </span>
-          <span
-            className="action-icon dark-icon eye"
-            title="Toggle read"
-            onClick={() => updateActivity({ isRead: !isRead })}
-            style={{ color: isRead ? '#3a9d46' : undefined }}
-          >
-            {isRead ? <EyeSolid style={{ width: '20px', height: '20px' }} /> : <EyeIcon style={{ width: '20px', height: '20px' }} strokeWidth={2} />}
-          </span>
-          <span
-            className="action-icon dark-icon readlist"
-            title="Readlist"
-            onClick={() => updateActivity({ inReadlist: !inReadlist })}
-            style={{ color: inReadlist ? '#3f7dbe' : undefined }}
-          >
-            {inReadlist ? <ClockSolid style={{ width: '20px', height: '20px' }} /> : <ClockIcon style={{ width: '20px', height: '20px' }} strokeWidth={2} />}
-          </span>
-        </div>
+        <BookRibbon
+          book={book}
+          isRead={!!isRead}
+          inReadlist={!!inReadlist}
+          onToggleRead={() => updateActivity({ isRead: !isRead })}
+          onToggleReadlist={() => updateActivity({ inReadlist: !inReadlist })}
+          onOptionsClick={() => {
+            if (onOpenFic) onOpenFic(book);
+            else onClick?.(book);
+          }}
+        />
+      </div>
+      <div className="book-info">
+        <h3 className="book-title inter-bold">{book.title}</h3>
+        {book.author_name && book.author_name.length > 0 && (
+          <p className="book-author inter-regular">{book.author_name.join(', ')}</p>
+        )}
+        {book.first_publish_year && (
+          <p className="book-year inter-regular">{book.first_publish_year}</p>
+        )}
       </div>
     </div>
   );

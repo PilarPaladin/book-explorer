@@ -12,10 +12,12 @@ import { Book } from './components/BookCard';
 import SearchModal from './components/SearchModal';
 import Header from './components/Header';
 import Fic from './pages/Fic';
+import Results from './pages/Results';
 import FinishedModal from './components/FinishedModal';
 import { useBookActivity } from './hooks/useBookActivity';
 import SignUpModal from './components/SignUpModal';
 import LogInModal from './components/LogInModal';
+import GuestModal from './components/GuestModal';
 
 function LogModalWrapper({ book, onClose }: { book: Book, onClose: () => void }) {
   const { activity, updateActivity } = useBookActivity(book);
@@ -49,6 +51,7 @@ function App() {
   const [selectedBookToLog, setSelectedBookToLog] = useState<Book | null>(null);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [authModalType, setAuthModalType] = useState<'register' | 'login'>('register');
+  const [isGuestModalOpen, setIsGuestModalOpen] = useState(false);
 
   useEffect(() => {
     const fetchInitial = async () => {
@@ -71,6 +74,7 @@ function App() {
 
     setIsLoading(true);
     setDisplayedQuery(searchQuery);
+    setCurrentPage('results');
     try {
       const results = await searchBooks(searchQuery);
       setBooks(results || []);
@@ -87,16 +91,24 @@ function App() {
       case 'home':
         return (
           <Home
-            displayedQuery={displayedQuery}
             isLoading={isLoading}
             books={books}
             setSelectedBook={(book) => { setSelectedBook(book); navigate('fic'); }}
           />
         );
+      case 'results':
+        return (
+          <Results
+            books={books}
+            isLoading={isLoading}
+            searchQuery={displayedQuery}
+            onBookSelect={(book) => { setSelectedBook(book); navigate('fic'); }}
+          />
+        );
       case 'bookmarks':
-        return <Bookmarks />;
+        return <Bookmarks onBookSelect={(book) => { setSelectedBook(book); navigate('fic'); }} />;
       case 'readlist':
-        return <Readlist />;
+        return <Readlist onBookSelect={(book) => { setSelectedBook(book); navigate('fic'); }} />;
       case 'journal':
         return <Journal onBookSelect={(book) => { setSelectedBook(book); navigate('fic'); }} />;
       case 'activity':
@@ -177,6 +189,7 @@ function App() {
         <SignUpModal
           onClose={() => setIsAuthModalOpen(false)}
           onSwitchToLogin={() => setAuthModalType('login')}
+          onGuestLogin={() => { setIsAuthModalOpen(false); setIsGuestModalOpen(true); }}
         />
       )}
       
@@ -185,6 +198,18 @@ function App() {
           onClose={() => setIsAuthModalOpen(false)}
           onSwitchToRegister={() => setAuthModalType('register')}
           onLoginSuccess={() => setIsLoggedIn(true)}
+          onGuestLogin={() => { setIsAuthModalOpen(false); setIsGuestModalOpen(true); }}
+        />
+      )}
+
+      {isGuestModalOpen && (
+        <GuestModal
+          onClose={() => setIsGuestModalOpen(false)}
+          onConfirm={() => {
+            setIsGuestModalOpen(false);
+            localStorage.setItem('currentUser', JSON.stringify({ username: 'Guest', isGuest: true }));
+            setIsLoggedIn(true);
+          }}
         />
       )}
     </div>

@@ -7,11 +7,12 @@ interface LogInModalProps {
     onClose: () => void;
     onSwitchToRegister: () => void;
     onLoginSuccess?: () => void;
+    onGuestLogin?: () => void;
 }
 
 
 
-export default function LogInModal({ onClose, onSwitchToRegister, onLoginSuccess }: LogInModalProps) {
+export default function LogInModal({ onClose, onSwitchToRegister, onLoginSuccess, onGuestLogin }: LogInModalProps) {
     useScrollLock();
 
     const [email, setEmail] = useState('');
@@ -124,6 +125,9 @@ export default function LogInModal({ onClose, onSwitchToRegister, onLoginSuccess
                     <button type="submit" className="auth-btn inter-bold">
                         Login
                     </button>
+                    <p className="inter-regular" style={{ textDecoration: 'underline', textAlign: 'center', margin: '0', cursor: 'pointer', color: 'var(--color-dark)' }} onClick={onGuestLogin}>
+                        Browse myArkive as guest
+                    </p>
                 </form>
             </div>
         </div>

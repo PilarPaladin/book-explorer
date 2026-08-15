@@ -14,3 +14,12 @@ export const getPopularBooks = async (): Promise<Book[]> => {
   //predefined search to simulate "popular" books for the initial view
   return searchBooks('computer');
 };
+
+export const getBookDetails = async (key: string): Promise<any> => {
+  const url = `https://openlibrary.org${key}.json`;
+  const response = await fetch(url);
+  if (!response.ok) {
+    throw new Error('Failed to fetch book details');
+  }
+  return response.json();
+};

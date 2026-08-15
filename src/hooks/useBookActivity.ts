@@ -3,9 +3,11 @@ import { Book } from '../components/BookCard';
 import { logActivity } from '../services/activityLogger';
 
 export interface BookmarkDetails {
+  id: string;
   chapter: string;
   page: string;
   notes: string;
+  date: string;
 }
 
 export interface BookActivity {
