@@ -9,44 +9,7 @@ interface LogInModalProps {
     onLoginSuccess?: () => void;
 }
 
-const authModalOverlayStyle: React.CSSProperties = {
-    position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-    backgroundColor: 'rgba(0,0,0,0.7)', display: 'flex',
-    justifyContent: 'center', alignItems: 'center', zIndex: 3000
-};
 
-const authModalContainerStyle: React.CSSProperties = {
-    backgroundColor: 'var(--color-white)',
-    borderRadius: '6px',
-    width: '450px',
-    boxShadow: '0 10px 30px rgba(0,0,0,0.5)',
-    padding: '30px',
-    color: 'var(--color-red)',
-    position: 'relative'
-};
-
-const authInputStyle: React.CSSProperties = {
-    padding: '12px',
-    borderRadius: '4px',
-    border: 'none',
-    backgroundColor: 'var(--color-gray)',
-    fontSize: '16px',
-    outline: 'none',
-    color: 'var(--color-dark)'
-};
-
-const authSubmitButtonStyle: React.CSSProperties = {
-    marginTop: '20px',
-    backgroundColor: 'var(--color-red)',
-    color: 'var(--color-white)',
-    border: 'none',
-    borderRadius: '4px',
-    padding: '14px',
-    fontSize: '16px',
-    letterSpacing: '1px',
-    cursor: 'pointer',
-    textTransform: 'uppercase'
-};
 
 export default function LogInModal({ onClose, onSwitchToRegister, onLoginSuccess }: LogInModalProps) {
     useScrollLock();
@@ -90,10 +53,10 @@ export default function LogInModal({ onClose, onSwitchToRegister, onLoginSuccess
     };
 
     return (
-        <div style={authModalOverlayStyle} onClick={onClose}>
+        <div className="auth-modal-overlay" onClick={onClose}>
 
             {/* Modal Container */}
-            <div style={authModalContainerStyle} onClick={e => e.stopPropagation()}>
+            <div className="auth-modal" onClick={e => e.stopPropagation()}>
 
                 {/* Close Button */}
                 <button onClick={onClose} style={{
@@ -104,11 +67,7 @@ export default function LogInModal({ onClose, onSwitchToRegister, onLoginSuccess
                 </button>
 
                 {/* Title */}
-                <h2 className="rakkas-regular" style={{
-                    fontSize: '36px',
-                    margin: '0 0 10px 0',
-                    color: 'var(--color-red)'
-                }}>
+                <h2 className="rakkas-regular">
                     Welcome Back !
                 </h2>
 
@@ -125,41 +84,45 @@ export default function LogInModal({ onClose, onSwitchToRegister, onLoginSuccess
                             type="text"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
-                            style={authInputStyle}
+                            className="auth-input"
                         />
                     </div>
 
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', position: 'relative' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                         <label className="inter-regular" style={{ fontSize: '15px' }}>Password</label>
-                        <input
-                            type={showPassword ? "text" : "password"}
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            style={{ ...authInputStyle, paddingRight: '40px' }}
-                        />
-                        <button
-                            type="button"
-                            onClick={() => setShowPassword(!showPassword)}
-                            style={{
-                                position: 'absolute',
-                                right: '12px',
-                                bottom: '8px',
-                                background: 'none',
-                                border: 'none',
-                                cursor: 'pointer',
-                                padding: 0
-                            }}
-                        >
-                            {showPassword ? (
-                                <EyeSlashIcon style={{ width: '20px', color: 'var(--color-dark)' }} />
-                            ) : (
-                                <EyeIcon style={{ width: '20px', color: 'var(--color-dark)' }} />
-                            )}
-                        </button>
+                        <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                            <input
+                                type={showPassword ? "text" : "password"}
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                className="auth-input"
+                                style={{ paddingRight: '40px' }}
+                            />
+                            <button
+                                type="button"
+                                onClick={() => setShowPassword(!showPassword)}
+                                style={{
+                                    position: 'absolute',
+                                    right: '12px',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    background: 'none',
+                                    border: 'none',
+                                    cursor: 'pointer',
+                                    padding: 0
+                                }}
+                            >
+                                {showPassword ? (
+                                    <EyeSlashIcon style={{ width: '20px', color: 'var(--color-dark)' }} />
+                                ) : (
+                                    <EyeIcon style={{ width: '20px', color: 'var(--color-dark)' }} />
+                                )}
+                            </button>
+                        </div>
                     </div>
 
-                    <button type="submit" className="inter-bold" style={authSubmitButtonStyle}>
-                        Log In
+                    <button type="submit" className="auth-btn inter-bold">
+                        Login
                     </button>
                 </form>
             </div>

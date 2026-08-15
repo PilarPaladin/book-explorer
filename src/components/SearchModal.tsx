@@ -16,10 +16,7 @@ const modalOverlayStyle: React.CSSProperties = {
   justifyContent: 'center', alignItems: 'center', zIndex: 2000
 };
 
-const modalContainerStyle: React.CSSProperties = {
-  backgroundColor: 'var(--color-white)', borderRadius: '6px', width: '600px',
-  boxShadow: '0 10px 30px rgba(0,0,0,0.3)'
-};
+
 
 const searchInputStyle: React.CSSProperties = {
   boxSizing: 'border-box', width: '100%', padding: '12px 15px', fontSize: '16px', 
@@ -67,7 +64,7 @@ export default function SearchModal({ onClose, onSelectBook, intent = 'search' }
 
   return (
     <div style={modalOverlayStyle} onClick={onClose}>
-      <div style={modalContainerStyle} onClick={e => e.stopPropagation()}>
+      <div className="search-modal" onClick={e => e.stopPropagation()}>
 
         {/* Header */}
         <div style={{ padding: '15px 20px', borderBottom: '1px solid var(--color-gray)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#f3f4f6', borderTopLeftRadius: '6px', borderTopRightRadius: '6px' }}>
@@ -80,7 +77,7 @@ export default function SearchModal({ onClose, onSelectBook, intent = 'search' }
         </div>
 
         {/* Body */}
-        <div style={{ padding: '40px 40px', display: 'flex', flexDirection: 'column', backgroundColor: 'var(--color-white)', borderBottomLeftRadius: '6px', borderBottomRightRadius: '6px' }}>
+        <div className="search-modal-body">
           <div style={{ position: 'relative' }}>
             <input
               type="text"

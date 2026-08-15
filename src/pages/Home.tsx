@@ -1,4 +1,4 @@
-
+import { useState, useEffect } from 'react';
 import LoadingGrid from '../components/LoadingGrid';
 import BookCard, { Book } from '../components/BookCard';
 
@@ -10,10 +10,26 @@ interface HomeProps {
 }
 
 export default function Home({ displayedQuery, isLoading, books, setSelectedBook }: HomeProps) {
+    const [username, setUsername] = useState('Reader');
+
+    useEffect(() => {
+        const storedUser = localStorage.getItem('currentUser');
+        if (storedUser) {
+            try {
+                const user = JSON.parse(storedUser);
+                if (user && user.username) {
+                    setUsername(user.username);
+                }
+            } catch (e) {
+                console.error('Failed to parse current user', e);
+            }
+        }
+    }, []);
+
     return (
         <>
             <h2 className="rakkas-regular" style={{ fontSize: '42px', color: '#990000', margin: '0 0 30px 0' }}>
-                {displayedQuery ? `Showing matches for "${displayedQuery}"` : "Welcome back, PilarPaladin. Here's what's been happening..."}
+                {displayedQuery ? `Showing matches for "${displayedQuery}"` : `Welcome back, ${username}. Here's what's been happening...`}
             </h2>
 
             {isLoading ? (

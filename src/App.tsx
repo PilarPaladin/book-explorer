@@ -14,6 +14,8 @@ import Header from './components/Header';
 import Fic from './pages/Fic';
 import FinishedModal from './components/FinishedModal';
 import { useBookActivity } from './hooks/useBookActivity';
+import SignUpModal from './components/SignUpModal';
+import LogInModal from './components/LogInModal';
 
 function LogModalWrapper({ book, onClose }: { book: Book, onClose: () => void }) {
   const { activity, updateActivity } = useBookActivity(book);
@@ -30,6 +32,14 @@ function LogModalWrapper({ book, onClose }: { book: Book, onClose: () => void })
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false); // Simulated auth state
   const [currentPage, setCurrentPage] = useState('home');
+  const [previousPage, setPreviousPage] = useState('home');
+
+  const navigate = (page: string) => {
+    if (page !== currentPage) {
+      setPreviousPage(currentPage);
+      setCurrentPage(page);
+    }
+  };
   const [isLogModalOpen, setIsLogModalOpen] = useState(false);
   const [books, setBooks] = useState<Book[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -37,6 +47,8 @@ function App() {
   const [displayedQuery, setDisplayedQuery] = useState('');
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
   const [selectedBookToLog, setSelectedBookToLog] = useState<Book | null>(null);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [authModalType, setAuthModalType] = useState<'register' | 'login'>('register');
 
   useEffect(() => {
     const fetchInitial = async () => {
@@ -78,7 +90,7 @@ function App() {
             displayedQuery={displayedQuery}
             isLoading={isLoading}
             books={books}
-            setSelectedBook={(book) => { setSelectedBook(book); setCurrentPage('fic'); }}
+            setSelectedBook={(book) => { setSelectedBook(book); navigate('fic'); }}
           />
         );
       case 'bookmarks':
@@ -86,12 +98,12 @@ function App() {
       case 'readlist':
         return <Readlist />;
       case 'journal':
-        return <Journal />;
+        return <Journal onBookSelect={(book) => { setSelectedBook(book); navigate('fic'); }} />;
       case 'activity':
-        return <Activity />;
+        return <Activity onBookSelect={(book) => { setSelectedBook(book); navigate('fic'); }} />;
       case 'fic':
         return selectedBook ? (
-          <Fic book={selectedBook} onBack={() => { setCurrentPage('home'); setSelectedBook(null); }} />
+          <Fic book={selectedBook} onBack={() => { navigate(previousPage); setSelectedBook(null); }} />
         ) : null;
       default:
         return null;
@@ -123,7 +135,10 @@ function App() {
         }}
       />
       <Header
-        setCurrentPage={setCurrentPage}
+        isLoggedIn={isLoggedIn}
+        onLoginClick={() => { setAuthModalType('login'); setIsAuthModalOpen(true); }}
+        onRegisterClick={() => { setAuthModalType('register'); setIsAuthModalOpen(true); }}
+        setCurrentPage={navigate}
         handleSearch={handleSearch}
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
@@ -131,14 +146,17 @@ function App() {
       />
 
       {!isLoggedIn ? (
-        <Welcome setIsLoggedIn={setIsLoggedIn} />
+        <Welcome 
+          setIsLoggedIn={setIsLoggedIn} 
+          onGetStarted={() => { setAuthModalType('register'); setIsAuthModalOpen(true); }} 
+        />
       ) : (
         <main className="main-content">
           <div className="left-column">
             {renderPage()}
           </div>
 
-          <Sidebar isLoading={isLoading} setCurrentPage={setCurrentPage} onBookSelect={(book) => { setSelectedBook(book); setCurrentPage('fic'); }} />
+          <Sidebar isLoading={isLoading} setCurrentPage={navigate} onBookSelect={(book) => { setSelectedBook(book); navigate('fic'); }} />
         </main>
       )}
 
@@ -153,6 +171,21 @@ function App() {
         <LogModalWrapper 
           book={selectedBookToLog} 
           onClose={() => setSelectedBookToLog(null)} 
+        />
+      )}
+
+      {isAuthModalOpen && authModalType === 'register' && (
+        <SignUpModal
+          onClose={() => setIsAuthModalOpen(false)}
+          onSwitchToLogin={() => setAuthModalType('login')}
+        />
+      )}
+      
+      {isAuthModalOpen && authModalType === 'login' && (
+        <LogInModal
+          onClose={() => setIsAuthModalOpen(false)}
+          onSwitchToRegister={() => setAuthModalType('register')}
+          onLoginSuccess={() => setIsLoggedIn(true)}
         />
       )}
     </div>

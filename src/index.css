@@ -430,3 +430,795 @@ body {
   background-color: #FF0000;
   color: var(--color-white);
 }
+
+/* ==========================================================================
+   Component Layout Classes
+   ========================================================================== */
+
+.feature-block-row {
+  display: flex;
+  align-items: center;
+  gap: 50px;
+  flex-direction: row;
+}
+
+.feature-block-row.image-left {
+  flex-direction: row-reverse;
+}
+
+.feature-content {
+  flex: 1;
+}
+
+.hero-text-container {
+  position: absolute;
+  bottom: 10%;
+  right: 5%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  text-align: right;
+  z-index: 2;
+}
+
+.welcome-banner {
+  position: relative;
+  width: 100%;
+  height: 80vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.welcome-banner-img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  z-index: 1;
+}
+
+.hero-text {
+  font-size: 44px;
+  color: var(--color-white);
+  margin: 0;
+  line-height: 1.4;
+  text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.5);
+}
+
+.hero-btn {
+  margin-top: 25px;
+  background-color: var(--color-red);
+  color: var(--color-white);
+  border: none;
+  padding: 16px 48px;
+  font-size: 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.welcome-section-title {
+  font-size: 72px;
+  margin: 0 0 20px 0;
+  text-align: center;
+}
+
+.welcome-section-subtitle {
+  font-size: 24px;
+  text-align: center;
+  max-width: 1000px;
+  margin: 0 auto 80px auto;
+  line-height: 1.4;
+}
+
+.feature-title {
+  font-size: 48px;
+  margin: 0 0 20px 0;
+}
+
+.feature-desc {
+  font-size: 20px;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.header-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.mobile-actions,
+.mobile-auth-buttons {
+  display: none;
+}
+
+.mobile-action-btn {
+  background: none;
+  border: none;
+  color: var(--color-white);
+  cursor: pointer;
+  padding: 5px;
+  display: flex;
+  align-items: center;
+}
+
+.desktop-auth-buttons {
+  display: flex;
+}
+
+.mobile-journal {
+  display: none;
+}
+
+/* Auth Modal Styles */
+.auth-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 3000;
+}
+
+.auth-modal {
+  background-color: var(--color-white);
+  border-radius: 6px;
+  width: 90%;
+  max-width: 450px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  padding: 30px;
+  color: var(--color-red);
+  position: relative;
+  box-sizing: border-box;
+}
+
+.auth-modal h2.rakkas-regular {
+  font-size: 36px !important;
+  margin: 0 0 15px 0 !important;
+}
+
+.auth-input {
+  padding: 12px;
+  border-radius: 4px;
+  border: none;
+  background-color: var(--color-gray);
+  font-size: 16px;
+  outline: none;
+  color: var(--color-dark);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.auth-btn {
+  margin-top: 20px;
+  background-color: var(--color-red);
+  color: var(--color-white);
+  border: none;
+  border-radius: 4px;
+  padding: 14px;
+  font-size: 16px;
+  letter-spacing: 1px;
+  cursor: pointer;
+  text-transform: uppercase;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Bookmark Modal */
+.bookmark-modal {
+  background-color: var(--color-white);
+  padding: 40px;
+  width: 90%;
+  max-width: 400px;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  box-sizing: border-box;
+}
+
+.bookmark-modal h2.rakkas-regular {
+  font-size: 42px;
+  margin: 0 0 30px 0;
+}
+
+/* Search Modal */
+.search-modal {
+  background-color: var(--color-white);
+  border-radius: 6px;
+  width: 90%;
+  max-width: 600px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  display: flex;
+  flex-direction: column;
+}
+
+.search-modal-body {
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--color-white);
+  border-bottom-left-radius: 6px;
+  border-bottom-right-radius: 6px;
+}
+
+/* Finished Modal */
+.finished-modal {
+  background-color: var(--color-white);
+  border-radius: 12px;
+  width: 90%;
+  max-width: 900px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.finished-modal-header {
+  padding: 20px 30px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--color-gray);
+}
+
+.finished-modal-title {
+  color: var(--color-red);
+  font-size: 24px;
+  margin: 0;
+}
+
+.finished-modal-body {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  grid-template-areas:
+    "cover info"
+    "cover controls";
+  grid-template-rows: auto 1fr;
+  gap: 20px 30px;
+  padding: 30px;
+}
+
+.finished-modal-cover {
+  grid-area: cover;
+  width: 100%;
+}
+
+.finished-modal-book-info {
+  grid-area: info;
+}
+
+.finished-modal-book-title {
+  color: var(--color-red);
+  font-size: 24px;
+  margin: 0;
+  line-height: 1.1;
+}
+
+.finished-modal-book-author {
+  color: var(--color-dark);
+  font-size: 18px;
+  margin: 5px 0 0 0;
+}
+
+.finished-modal-controls {
+  grid-area: controls;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.finished-form-row {
+  display: flex;
+  gap: 30px;
+  align-items: center;
+}
+
+.finished-rating-row {
+  display: flex;
+  justify-content: flex-start;
+  gap: 60px;
+  align-items: flex-start;
+  margin-top: auto;
+}
+
+.finished-modal-footer {
+  background-color: #f9fafb;
+  border-top: 1px solid var(--color-gray);
+  padding: 15px 30px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.finished-modal-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--color-dark);
+  cursor: pointer;
+  user-select: none;
+}
+
+.finished-modal-checkbox {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+}
+
+.finished-modal-date {
+  background-color: #f3f4f6;
+  border: 1px solid var(--color-gray);
+  border-radius: 4px;
+  padding: 4px 8px;
+  color: #374151;
+  outline: none;
+}
+
+.finished-modal-review {
+  width: 100%;
+  height: 130px;
+  background-color: #f3f4f6;
+  border: 1px solid var(--color-gray);
+  border-radius: 6px;
+  padding: 15px;
+  color: #374151;
+  font-size: 16px;
+  resize: none;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.finished-modal-submit {
+  background-color: #990000;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 10px 25px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+/* Fic Page Responsive Layout */
+.fic-container {
+  display: flex;
+  gap: 40px;
+  width: 100%;
+  position: relative;
+}
+
+.fic-left {
+  width: 320px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+}
+
+.fic-right {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 10px 0;
+}
+
+.fic-details-grid {
+  font-size: 16px;
+  color: var(--color-dark);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+}
+
+.fic-actions-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px 40px;
+  justify-items: start;
+}
+
+.fic-action-btn {
+  width: 200px;
+  justify-content: flex-start;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 20px;
+  color: var(--color-dark);
+  padding: 0;
+}
+
+/* ==========================================================================
+   Responsive Design Media Queries
+   ========================================================================== */
+
+/* Tablet (max-width: 1024px) */
+@media (max-width: 1024px) {
+  .main-content {
+    padding: 30px 20px;
+    gap: 25px;
+  }
+
+  .book-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .header {
+    padding: 12px 20px;
+  }
+}
+
+/* Mobile (max-width: 768px) */
+@media (max-width: 768px) {
+  .main-content {
+    flex-direction: column;
+    padding: 20px 15px;
+    gap: 30px;
+  }
+
+  .right-column {
+    display: none;
+  }
+
+  .book-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+  }
+
+  .fav-reads-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+
+  .header {
+    flex-direction: column;
+    padding: 15px;
+    gap: 0;
+  }
+
+  .header-top {
+    width: 100%;
+  }
+
+  .mobile-actions,
+  .mobile-auth-buttons {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .desktop-auth-buttons {
+    display: none !important;
+  }
+
+  .desktop-only {
+    display: none !important;
+  }
+
+  .desktop-search {
+    display: none !important;
+  }
+
+  .desktop-log-btn {
+    display: none !important;
+  }
+
+  .desktop-journal {
+    display: none !important;
+  }
+
+  .mobile-journal {
+    display: block !important;
+  }
+
+  .journal-header {
+    padding: 0 15px;
+  }
+
+  .header-nav {
+    display: none;
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 15px;
+    margin-top: 15px;
+  }
+
+  .header-nav.mobile-open {
+    display: flex;
+  }
+
+  .nav-links {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+  }
+
+  .nav-link {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 15px 0;
+    text-align: center;
+  }
+
+  .nav-link:last-child {
+    border-bottom: none;
+  }
+
+  .search-container {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .feature-block-row {
+    flex-direction: column !important;
+    gap: 30px;
+  }
+
+  .welcome-banner {
+    height: auto;
+  }
+
+  .welcome-banner-img {
+    position: static;
+    height: auto;
+    object-fit: contain;
+    display: block;
+  }
+
+  .hero-text-container {
+    position: absolute;
+    bottom: 5%;
+    right: 5%;
+    transform: none;
+    width: auto;
+    padding: 0;
+    background-color: transparent;
+  }
+
+  .hero-text {
+    font-size: 16px !important;
+    text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.8);
+    text-align: right;
+  }
+
+  .hero-btn {
+    padding: 6px 16px;
+    font-size: 14px;
+    background-color: var(--color-red);
+    color: var(--color-white);
+    margin-top: 10px;
+  }
+
+  .welcome-section-title {
+    font-size: 42px !important;
+  }
+
+  .welcome-section-subtitle {
+    font-size: 16px !important;
+    margin-bottom: 40px !important;
+  }
+
+  .feature-title {
+    font-size: 28px !important;
+    margin-bottom: 10px !important;
+  }
+
+  .feature-desc {
+    font-size: 15px !important;
+  }
+
+  .brand-name {
+    display: none;
+  }
+
+  /* Force inline font-sizes to scale down gracefully on mobile for headings */
+  h1.rakkas-regular,
+  h2.rakkas-regular,
+  h3.rakkas-regular {
+    font-size: clamp(28px, 8vw, 42px) !important;
+  }
+
+  /* Auth Modal Mobile Overrides */
+  .auth-modal {
+    padding: 20px 15px;
+  }
+
+  .auth-modal h2.rakkas-regular {
+    font-size: 26px !important;
+    margin-bottom: 10px !important;
+  }
+
+  .auth-input {
+    padding: 10px;
+    font-size: 14px;
+  }
+
+  .auth-btn {
+    padding: 12px;
+    font-size: 14px;
+    margin-top: 15px;
+  }
+
+  /* Bookmark Modal Mobile */
+  .bookmark-modal {
+    padding: 25px 20px;
+  }
+
+  .bookmark-modal h2.rakkas-regular {
+    font-size: 28px !important;
+    margin-bottom: 20px !important;
+  }
+
+  /* Search Modal Mobile */
+  .search-modal-body {
+    padding: 20px 15px;
+  }
+
+  /* Finished Modal Mobile */
+  .finished-modal-body {
+    grid-template-columns: 100px 1fr;
+    grid-template-areas:
+      "cover info"
+      "controls controls";
+    padding: 15px;
+    gap: 15px;
+  }
+
+  h3.finished-modal-book-title {
+    font-size: 31px !important;
+  }
+
+  .finished-modal-book-author {
+    font-size: 14px !important;
+  }
+
+  .finished-modal-header {
+    padding: 10px 15px;
+  }
+
+  h2.finished-modal-title {
+    font-size: 24px !important;
+  }
+
+  .finished-modal-review {
+    height: 70px !important;
+    padding: 10px !important;
+    font-size: 14px !important;
+  }
+
+  .finished-modal-controls {
+    gap: 15px !important;
+  }
+
+  .finished-form-row {
+    flex-direction: column;
+    align-items: flex-start !important;
+    gap: 10px !important;
+  }
+
+  .finished-form-row input[type="date"] {
+    font-size: 12px;
+    padding: 2px 4px;
+  }
+
+  .finished-modal-label {
+    font-size: 14px !important;
+  }
+
+  .finished-rating-row {
+    margin-top: 0;
+    gap: 30px !important;
+    justify-content: flex-start !important;
+  }
+
+  .finished-modal-footer {
+    padding: 10px 15px;
+  }
+
+  .finished-modal-submit {
+    padding: 8px 16px !important;
+    font-size: 14px !important;
+  }
+
+  /* Fic Page Mobile Overrides */
+  .fic-container {
+    display: grid;
+    grid-template-columns: 160px 1fr;
+    grid-template-areas:
+      "cover title"
+      "stats title"
+      "synopsis synopsis"
+      "actions actions";
+    gap: 20px 15px;
+    align-items: start;
+  }
+
+  .fic-left,
+  .fic-right {
+    display: contents;
+  }
+
+  .fic-cover-block {
+    grid-area: cover;
+  }
+
+  .fic-stats-block {
+    grid-area: stats;
+    margin-top: 5px;
+    font-size: 11px !important;
+    padding: 0 !important;
+    justify-content: space-between !important;
+  }
+
+  .fic-stats-block svg {
+    width: 14px !important;
+  }
+
+  .fic-stats-block>div {
+    gap: 3px !important;
+  }
+
+  .fic-title-block {
+    grid-area: title;
+    padding-right: 0 !important;
+  }
+
+  .fic-synopsis-block {
+    grid-area: synopsis;
+    padding-right: 0 !important;
+    margin-top: 0 !important;
+  }
+
+  .fic-actions-block {
+    grid-area: actions;
+  }
+
+  /* Shrink down title and details */
+  .fic-title-block h2.rakkas-regular {
+    font-size: 22px !important;
+    margin-bottom: 8px !important;
+    line-height: 1.2 !important;
+  }
+
+  .fic-title-block .fic-details-grid {
+    font-size: 11px !important;
+    gap: 4px;
+  }
+
+  .fic-details-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .fic-actions-grid {
+    grid-template-columns: 1fr;
+    width: 100%;
+    gap: 15px;
+  }
+
+  .fic-action-btn {
+    width: 100%;
+  }
+}

@@ -149,6 +149,7 @@ export default function Sidebar({ isLoading, setCurrentPage, onBookSelect }: Sid
                       ) : (
                         <span className="activity-title inter-bold">"{item.bookTitle}"</span>
                       )}
+                      {item.isReread ? ' again' : ''}
                       {item.rating ? (
                         <span style={{ marginLeft: '4px', verticalAlign: 'middle', display: 'inline-flex', gap: '1px' }}>
                           {[...Array(Math.max(0, Math.floor(Number(item.rating) || 0)))].map((_, i) => <StarSolid key={i} style={{ width: '12px', color: 'var(--color-dark)' }} />)}

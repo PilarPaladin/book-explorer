@@ -1,9 +1,8 @@
-import React, { useState } from 'react';
-import SignInModal from '../components/SignInModal';
-import LogInModal from '../components/LogInModal';
+import React from 'react';
 
 interface WelcomeProps {
     setIsLoggedIn: (isLoggedIn: boolean) => void;
+    onGetStarted: () => void;
 }
 
 interface FeatureBlockProps {
@@ -15,24 +14,21 @@ interface FeatureBlockProps {
 
 function FeatureBlock({ title, description, imageSrc, imageLeft = false }: FeatureBlockProps) {
     return (
-        <div style={{ display: 'flex', alignItems: 'center', gap: '50px', flexDirection: imageLeft ? 'row-reverse' : 'row' }}>
-            <div style={{ flex: 1 }}>
-                <h3 className="rakkas-regular" style={{ fontSize: '48px', margin: '0 0 20px 0' }}>{title}</h3>
-                <p className="inter-regular" style={{ fontSize: '20px', lineHeight: '1.5', margin: 0 }}>
+        <div className={`feature-block-row ${imageLeft ? 'image-left' : ''}`}>
+            <div className="feature-content">
+                <h3 className="rakkas-regular feature-title">{title}</h3>
+                <p className="inter-regular feature-desc">
                     {description}
                 </p>
             </div>
-            <div style={{ flex: 1 }}>
+            <div className="feature-content">
                 <img src={imageSrc} alt={title} style={{ width: '100%', borderRadius: '24px', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }} />
             </div>
         </div>
     );
 }
 
-export default function Welcome({ setIsLoggedIn }: WelcomeProps) {
-    const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-    const [authModalType, setAuthModalType] = useState<'register' | 'login'>('register');
-
+export default function Welcome({ setIsLoggedIn, onGetStarted }: WelcomeProps) {
     return (
         <div style={{
             width: '100%',
@@ -41,48 +37,16 @@ export default function Welcome({ setIsLoggedIn }: WelcomeProps) {
             backgroundColor: 'var(--color-white)'
         }}>
             {/* Banner Section */}
-            <div
-                style={{
-                    position: 'relative',
-                    width: '100%',
-                    height: '80vh',
-                    backgroundImage: `url(/welcomebanner.png)`,
-                    backgroundSize: 'cover',
-                    backgroundPosition: 'center',
-                    display: 'flex',
-                    flexDirection: 'column'
-                }}
-            >
+            <div className="welcome-banner">
+                <img src="/welcomebanner.png" alt="Welcome Banner" className="welcome-banner-img" />
                 {/* Bottom Right Slogan */}
-                <div style={{ position: 'absolute', bottom: '10%', right: '5%', textAlign: 'center' }}>
-                    <p className="rakkas-regular" style={{
-                        fontSize: '44px',
-                        color: 'var(--color-white)',
-                        margin: 0,
-                        lineHeight: '1.4',
-                        textShadow: '2px 2px 6px rgba(0,0,0,0.5)'
-                    }}>
+                <div className="hero-text-container">
+                    <p className="rakkas-regular hero-text">
                         count every word.<br />
                         keep every kudo.<br />
                         track every ship.
                     </p>
-                    <button
-                        className="inter-bold"
-                        onClick={() => { setIsAuthModalOpen(true); setAuthModalType('register'); }}
-                        style={{
-                            marginTop: '25px',
-                            backgroundColor: 'var(--color-red)',
-                            color: 'var(--color-white)',
-                            border: 'none',
-                            padding: '16px 48px',
-                            fontSize: '20px',
-                            borderRadius: '4px',
-                            cursor: 'pointer',
-                            boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
-                            textTransform: 'uppercase',
-                            letterSpacing: '1px'
-                        }}
-                    >
+                    <button className="inter-bold hero-btn" onClick={onGetStarted}>
                         Get Started
                     </button>
                 </div>
@@ -90,11 +54,11 @@ export default function Welcome({ setIsLoggedIn }: WelcomeProps) {
 
             {/* How it works section */}
             <div style={{ padding: '1px 20px', maxWidth: '1200px', margin: '0 auto', backgroundColor: 'var(--color-white)', color: 'var(--color-red)' }}>
-                <h2 className="rakkas-regular" style={{ fontSize: '72px', margin: '0 0 20px 0', textAlign: 'center' }}>
+                <h2 className="rakkas-regular welcome-section-title">
                     How myArkived works
                 </h2>
 
-                <p className="inter-regular" style={{ fontSize: '24px', textAlign: 'center', maxWidth: '1000px', margin: '0 auto 80px auto', lineHeight: '1.4' }}>
+                <p className="inter-regular welcome-section-subtitle">
                     <strong>Sign in</strong> or <strong>register</strong> to unlock your personal vault. Curate your readlist with private custom images, and track your stats all in one place— completely for free.
                 </p>
 
@@ -128,20 +92,6 @@ export default function Welcome({ setIsLoggedIn }: WelcomeProps) {
 
                 </div>
             </div>
-
-            {isAuthModalOpen && authModalType === 'register' && (
-                <SignInModal
-                    onClose={() => setIsAuthModalOpen(false)}
-                    onSwitchToLogin={() => setAuthModalType('login')}
-                />
-            )}
-            {isAuthModalOpen && authModalType === 'login' && (
-                <LogInModal
-                    onClose={() => setIsAuthModalOpen(false)}
-                    onSwitchToRegister={() => setAuthModalType('register')}
-                    onLoginSuccess={() => setIsLoggedIn(true)}
-                />
-            )}
         </div>
     );
 }

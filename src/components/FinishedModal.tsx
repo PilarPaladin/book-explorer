@@ -40,11 +40,11 @@ export default function FinishedModal({ book, activity = {} as BookActivity, onC
 
   return (
     <div className="modal-overlay" onClick={onClose} style={{ zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.6)' }}>
-      <div className="modal-content" onClick={e => e.stopPropagation()} style={{ backgroundColor: 'var(--color-white)', borderRadius: '12px', width: '900px', display: 'flex', flexDirection: 'column', overflow: 'hidden', boxShadow: '0 10px 30px rgba(0,0,0,0.3)' }}>
+      <div className="finished-modal" onClick={e => e.stopPropagation()}>
 
         {/* Header */}
-        <div style={{ padding: '20px 30px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--color-gray)' }}>
-          <h2 className="rakkas-regular" style={{ color: 'var(--color-red)', fontSize: '32px', margin: 0 }}>
+        <div className="finished-modal-header">
+          <h2 className="rakkas-regular finished-modal-title">
             {isEditMode ? 'Edit activity...' : 'I finished reading...'}
           </h2>
           <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
@@ -53,45 +53,46 @@ export default function FinishedModal({ book, activity = {} as BookActivity, onC
         </div>
 
         {/* Body */}
-        <div style={{ display: 'flex', padding: '30px', gap: '30px' }}>
+        <div className="finished-modal-body">
 
           {/* Left: Cover */}
-          <div style={{ width: '200px', flexShrink: 0 }}>
+          <div className="finished-modal-cover">
             <img src={book.cover_i ? `https://covers.openlibrary.org/b/id/${book.cover_i}-L.jpg` : '/tempCover.png'} alt="Cover" style={{ width: '100%', borderRadius: '8px', boxShadow: '0 4px 10px rgba(0,0,0,0.1)', aspectRatio: '2/3', objectFit: 'cover' }} />
           </div>
 
-          {/* Right: Form */}
-          <div style={{ flexGrow: 1, display: 'flex', flexDirection: 'column', gap: '20px' }}>
+          {/* Right: Info */}
+          <div className="finished-modal-book-info">
+            <h3 className="rakkas-regular finished-modal-book-title">{book.title}</h3>
+            <p className="inter-regular finished-modal-book-author">
+              {book.author_name?.join(', ') || 'Unknown Author'}
+            </p>
+          </div>
 
-            {/* Title & Author */}
-            <div>
-              <h3 className="rakkas-regular" style={{ color: 'var(--color-red)', fontSize: '32px', margin: 0, lineHeight: 1.1 }}>{book.title}</h3>
-              <p className="inter-regular" style={{ color: 'var(--color-dark)', fontSize: '18px', margin: '5px 0 0 0' }}>
-                {book.author_name?.join(', ') || 'Unknown Author'}
-              </p>
-            </div>
+          {/* Controls */}
+          <div className="finished-modal-controls">
+
 
             {/* Checkboxes */}
-            <div style={{ display: 'flex', gap: '30px', alignItems: 'center' }}>
+            <div className="finished-form-row">
 
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <label className="inter-regular" style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--color-dark)', cursor: 'pointer', userSelect: 'none' }}>
-                  <input type="checkbox" checked={startedOnChecked} onChange={(e) => setStartedOnChecked(e.target.checked)} style={{ width: '18px', height: '18px', cursor: 'pointer' }} />
+                <label className="inter-regular finished-modal-label">
+                  <input type="checkbox" checked={startedOnChecked} onChange={(e) => setStartedOnChecked(e.target.checked)} className="finished-modal-checkbox" />
                   Started On
                 </label>
-                <input type="date" value={startedOnDate} onChange={e => setStartedOnDate(e.target.value)} className="inter-regular" style={{ backgroundColor: '#f3f4f6', border: '1px solid var(--color-gray)', borderRadius: '4px', padding: '4px 8px', color: '#374151', outline: 'none' }} />
+                <input type="date" value={startedOnDate} onChange={e => setStartedOnDate(e.target.value)} className="inter-regular finished-modal-date" />
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <label className="inter-regular" style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--color-dark)', cursor: 'pointer', userSelect: 'none' }}>
-                  <input type="checkbox" checked={readOnChecked} onChange={(e) => setReadOnChecked(e.target.checked)} style={{ width: '18px', height: '18px', cursor: 'pointer' }} />
+                <label className="inter-regular finished-modal-label">
+                  <input type="checkbox" checked={readOnChecked} onChange={(e) => setReadOnChecked(e.target.checked)} className="finished-modal-checkbox" />
                   Finished on
                 </label>
-                <input type="date" value={readOnDate} onChange={e => setReadOnDate(e.target.value)} className="inter-regular" style={{ backgroundColor: '#f3f4f6', border: '1px solid var(--color-gray)', borderRadius: '4px', padding: '4px 8px', color: '#374151', outline: 'none' }} />
+                <input type="date" value={readOnDate} onChange={e => setReadOnDate(e.target.value)} className="inter-regular finished-modal-date" />
               </div>
             </div>
 
-            <label className="inter-regular" style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--color-dark)', cursor: 'pointer', userSelect: 'none' }}>
-              <input type="checkbox" checked={readBefore} onChange={(e) => setReadBefore(e.target.checked)} style={{ width: '18px', height: '18px', cursor: 'pointer' }} />
+            <label className="inter-regular finished-modal-label">
+              <input type="checkbox" checked={readBefore} onChange={(e) => setReadBefore(e.target.checked)} className="finished-modal-checkbox" />
               I've read this before
             </label>
 
@@ -100,12 +101,11 @@ export default function FinishedModal({ book, activity = {} as BookActivity, onC
               placeholder="Add a thought..."
               value={review}
               onChange={e => setReview(e.target.value)}
-              className="inter-regular"
-              style={{ width: '100%', height: '130px', backgroundColor: '#f3f4f6', border: '1px solid var(--color-gray)', borderRadius: '6px', padding: '15px', color: '#374151', fontSize: '16px', resize: 'none', outline: 'none', boxSizing: 'border-box' }}
+              className="inter-regular finished-modal-review"
             />
 
             {/* Bottom row: Rating, Like */}
-            <div style={{ display: 'flex', justifyContent: 'flex-start', gap: '60px', alignItems: 'flex-start', marginTop: 'auto' }}>
+            <div className="finished-rating-row">
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', alignItems: 'center' }}>
                 <span className="inter-bold" style={{ fontSize: '12px', color: 'var(--color-dark)', textTransform: 'uppercase' }}>Rating</span>
@@ -124,8 +124,8 @@ export default function FinishedModal({ book, activity = {} as BookActivity, onC
         </div>
 
         {/* Footer */}
-        <div style={{ backgroundColor: '#f9fafb', borderTop: '1px solid var(--color-gray)', padding: '15px 30px', display: 'flex', justifyContent: 'flex-end' }}>
-          <button onClick={handleSave} className="inter-bold" style={{ backgroundColor: '#990000', color: 'white', border: 'none', borderRadius: '4px', padding: '10px 25px', fontSize: '16px', cursor: 'pointer' }}>
+        <div className="finished-modal-footer">
+          <button onClick={handleSave} className="inter-bold finished-modal-submit">
             Save
           </button>
         </div>

@@ -10,6 +10,7 @@ export interface RecentActivityItem {
   rating?: number;
   review?: string;
   timestamp: number;
+  isReread?: boolean;
 }
 
 export function logActivity(book: Book | null, actions: string[], startedDate?: string, finishedDate?: string, rating?: number, review?: string) {
@@ -89,5 +90,27 @@ export function logActivity(book: Book | null, actions: string[], startedDate?: 
 
 export function getRecentActivity(): RecentActivityItem[] {
   const stored = localStorage.getItem('recentActivity');
-  return stored ? JSON.parse(stored) : [];
+  if (!stored) return [];
+  const activities: RecentActivityItem[] = JSON.parse(stored);
+  
+  const readBooks = new Set<string>();
+  const isRereadMap: Record<string, boolean> = {};
+  
+  const userActivityStr = localStorage.getItem('userActivity');
+  const userActivity = userActivityStr ? JSON.parse(userActivityStr) : {};
+
+  [...activities].reverse().forEach(item => {
+    const bookState = userActivity[item.bookKey];
+    if (bookState?.readBefore || readBooks.has(item.bookKey)) {
+      isRereadMap[item.id] = true;
+    }
+    if (item.actions.includes('Finished') || item.actions.includes('Read')) {
+      readBooks.add(item.bookKey);
+    }
+  });
+
+  return activities.map(item => ({
+    ...item,
+    isReread: !!isRereadMap[item.id]
+  }));
 }

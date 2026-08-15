@@ -48,19 +48,10 @@ export default function BookmarkModal({
       onClick={onClose}
     >
       <div
-        style={{
-          backgroundColor: 'var(--color-white)',
-          padding: '40px',
-          width: '400px',
-          borderRadius: '12px',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          boxShadow: '0 4px 20px rgba(0,0,0,0.15)'
-        }}
+        className="bookmark-modal"
         onClick={(e) => e.stopPropagation()}
       >
-        <h2 className="rakkas-regular" style={{ color: 'var(--color-red)', fontSize: '42px', margin: '0 0 30px 0', textAlign: 'center' }}>
+        <h2 className="rakkas-regular" style={{ color: 'var(--color-red)', textAlign: 'center' }}>
           Add Bookmark
         </h2>
 

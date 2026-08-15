@@ -33,7 +33,7 @@ function formatActions(actions: string[]) {
 }
 
 interface ActivityFeedProps {
-  onBookSelect?: (book: any) => void;
+    onBookSelect?: (book: any) => void;
 }
 
 interface ActivityFeedItemProps {
@@ -52,62 +52,74 @@ function ActivityFeedItem({ item, userActivity, onBookSelect, verbsText, suffix,
     const coverUrl = bookState?.bookData?.cover_i
         ? `https://covers.openlibrary.org/b/id/${bookState.bookData.cover_i}-M.jpg`
         : '/tempCover.png';
-    const firstPublishYear = bookState?.bookData?.first_publish_year || '';
+    const author = bookState?.bookData?.author_name?.[0] || '';
 
     return (
         <div style={{ borderBottom: '1px solid var(--color-gray)', padding: '15px 0' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                 <div className="inter-regular" style={{ color: 'var(--color-dark)', fontSize: '15px' }}>
-                    You {verbsText} {' '}
-                    {onBookSelect && bookState?.bookData ? (
-                        <strong 
-                            style={{ color: '#990000', fontWeight: 'bold', cursor: 'pointer', textDecoration: 'underline' }} 
-                            onClick={() => onBookSelect(bookState.bookData)}
-                        >
-                            {item.bookTitle}
-                        </strong>
-                    ) : (
-                        <strong style={{ color: '#990000', fontWeight: 'bold' }}>{item.bookTitle}</strong>
-                    )}
-                    {suffix ? ` ${suffix}` : ''}
-                    {!hasReview && item.rating ? (
-                        <span style={{ marginLeft: '6px', color: 'var(--color-dark)', fontSize: '12px', verticalAlign: 'middle', display: 'inline-flex', gap: '1px' }}>
-                            {[...Array(Math.max(0, Math.floor(Number(item.rating) || 0)))].map((_, i) => <StarSolid key={i} style={{ width: '13px' }} />)}
-                        </span>
+                    You {verbsText}{suffix ? ` ${suffix}` : ''}
+                    {!hasReview ? (
+                        <>
+                            {' '}
+                            {onBookSelect && bookState?.bookData ? (
+                                <strong
+                                    className="rakkas-regular" style={{ fontSize: '17px', color: 'var(--color-red)', cursor: 'pointer', textDecoration: 'underline', letterSpacing: '1.5px' }}
+                                    onClick={() => onBookSelect(bookState.bookData)}
+                                >
+                                    {item.bookTitle}
+                                </strong>
+                            ) : (
+                                <strong style={{ color: 'var(--color-red)', fontWeight: 'bold' }}>{item.bookTitle}</strong>
+                            )}
+                            {item.isReread ? ' again' : ''}
+                            {item.rating ? (
+                                <span style={{ marginLeft: '6px', color: 'var(--color-dark)', fontSize: '12px', verticalAlign: 'middle', display: 'inline-flex', gap: '1px' }}>
+                                    {[...Array(Math.max(0, Math.floor(Number(item.rating) || 0)))].map((_, i) => <StarSolid key={i} style={{ width: '13px' }} />)}
+                                </span>
+                            ) : null}
+                            {dateStr}
+                        </>
                     ) : null}
-                    {dateStr}
                 </div>
-                <div className="inter-regular" style={{ color: 'var(--color-gray)', fontSize: '14px', minWidth: '40px', textAlign: 'right' }}>
+                <div className="inter-regular" style={{ color: 'var(--color-gray)', fontSize: '14px', minWidth: '40px', textAlign: 'right', flexShrink: 0, paddingLeft: '10px' }}>
                     {relTime}
                 </div>
             </div>
 
             {hasReview && (
-                <div style={{ display: 'flex', gap: '20px', marginTop: '15px', paddingLeft: '5px' }}>
-                    <div style={{ width: '110px', flexShrink: 0, border: '1px solid var(--color-gray)', borderRadius: '4px', overflow: 'hidden' }}>
-                        <img src={coverUrl} alt={item.bookTitle} style={{ width: '100%', display: 'block', objectFit: 'cover' }} onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = '/tempCover.png'; }} />
+                <div style={{ marginTop: '10px' }}>
+                    <div style={{ display: 'flex', alignItems: 'baseline', gap: '10px' }}>
+                        {onBookSelect && bookState?.bookData ? (
+                            <h4 className="rakkas-regular" style={{ fontSize: '20px', color: 'var(--color-red)', margin: 0, lineHeight: 1, cursor: 'pointer', textDecoration: 'underline' }} onClick={() => onBookSelect(bookState.bookData)}>
+                                {item.bookTitle}
+                            </h4>
+                        ) : (
+                            <h4 className="rakkas-regular" style={{ fontSize: '20px', color: 'var(--color-red)', margin: 0, lineHeight: 1 }}>
+                                {item.bookTitle}
+                            </h4>
+                        )}
+                        {item.isReread && <span className="inter-regular" style={{ color: 'var(--color-dark)', fontSize: '15px' }}>again</span>}
+                        {author && <span className="inter-regular" style={{ color: 'var(--color-dark)', fontWeight: 'bold', fontSize: '12px' }}>{author}</span>}
                     </div>
-                    <div style={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
-                        <div style={{ display: 'flex', alignItems: 'baseline', gap: '10px' }}>
-                            <h3 className="rakkas-regular" style={{ fontSize: '28px', color: 'var(--color-dark)', margin: 0, lineHeight: 1 }}>{item.bookTitle}</h3>
-                            {firstPublishYear && <span className="inter-regular" style={{ color: 'var(--color-gray)', fontSize: '16px' }}>{firstPublishYear}</span>}
+
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '6px', marginBottom: '12px' }}>
+                        {item.rating ? (
+                            <div style={{ display: 'flex', color: 'var(--color-dark)', gap: '1px' }}>
+                                {[...Array(Math.max(0, Math.floor(Number(item.rating) || 0)))].map((_, i) => <StarSolid key={i} style={{ width: '14px' }} />)}
+                            </div>
+                        ) : null}
+                        {item.actions.includes('Loved') && <HeartSolid style={{ width: '14px', color: 'var(--color-red)' }} />}
+                    </div>
+
+                    <div style={{ display: 'flex', gap: '15px' }}>
+                        <div style={{ width: '70px', height: '105px', flexShrink: 0, border: '1px solid var(--color-gray)', borderRadius: '4px', overflow: 'hidden' }}>
+                            <img src={coverUrl} alt={item.bookTitle} style={{ width: '100%', height: '100%', display: 'block', objectFit: 'cover' }} onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = '/tempCover.png'; }} />
                         </div>
-
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '8px', marginBottom: '15px' }}>
-                            {item.rating ? (
-                                <div style={{ display: 'flex', color: 'var(--color-dark)', gap: '1px' }}>
-                                    {[...Array(Math.max(0, Math.floor(Number(item.rating) || 0)))].map((_, i) => <StarSolid key={i} style={{ width: '18px' }} />)}
-                                </div>
-                            ) : null}
-                            {item.actions.includes('Loved') && <HeartSolid style={{ width: '18px', color: '#990000' }} />}
-                        </div>
-
-                        <p className="inter-regular" style={{ color: 'var(--color-dark)', fontSize: '16px', lineHeight: 1.6, margin: '0 0 20px 0' }}>
-                            {item.review}
-                        </p>
-
-                        <div className="inter-regular" style={{ display: 'flex', alignItems: 'center', gap: '5px', color: 'var(--color-gray)', fontSize: '14px', marginTop: 'auto' }}>
-                            <HeartSolid style={{ width: '16px', color: 'var(--color-gray)' }} /> No likes yet
+                        <div style={{ flexGrow: 1 }}>
+                            <p className="inter-regular" style={{ color: 'var(--color-dark)', fontSize: '15px', lineHeight: 1.5, margin: '0 0 10px 0', whiteSpace: 'pre-wrap' }}>
+                                {item.review}
+                            </p>
                         </div>
                     </div>
                 </div>
@@ -165,15 +177,15 @@ export default function ActivityFeed({ onBookSelect }: ActivityFeedProps) {
                         }
 
                         return (
-                            <ActivityFeedItem 
+                            <ActivityFeedItem
                                 key={item.id}
-                                item={item} 
-                                userActivity={userActivity} 
-                                onBookSelect={onBookSelect} 
-                                verbsText={verbsText} 
-                                suffix={suffix} 
-                                dateStr={dateStr} 
-                                relTime={relTime} 
+                                item={item}
+                                userActivity={userActivity}
+                                onBookSelect={onBookSelect}
+                                verbsText={verbsText}
+                                suffix={suffix}
+                                dateStr={dateStr}
+                                relTime={relTime}
                             />
                         );
                     })
