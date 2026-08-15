@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { searchBooks, getPopularBooks } from './services/api';
+import { getPopularBooks } from './services/api';
 import toast, { Toaster } from 'react-hot-toast';
 import Bookmarks from './pages/Bookmarks';
 import Readlist from './pages/Readlist';
@@ -72,18 +72,8 @@ function App() {
     e.preventDefault();
     if (!searchQuery.trim()) return;
 
-    setIsLoading(true);
     setDisplayedQuery(searchQuery);
     setCurrentPage('results');
-    try {
-      const results = await searchBooks(searchQuery);
-      setBooks(results || []);
-    } catch (err) {
-      console.error("Search failed", err);
-      setBooks([]);
-      toast.error("Search failed");
-    }
-    setIsLoading(false);
   };
 
   const renderPage = () => {
@@ -99,8 +89,6 @@ function App() {
       case 'results':
         return (
           <Results
-            books={books}
-            isLoading={isLoading}
             searchQuery={displayedQuery}
             onBookSelect={(book) => { setSelectedBook(book); navigate('fic'); }}
           />

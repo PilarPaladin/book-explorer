@@ -21,8 +21,8 @@ export default function StarRating({ rating, setRating }: StarRatingProps) {
   };
 
   return (
-    <div style={{ display: 'flex', alignItems: 'center', position: 'relative' }} onMouseEnter={() => setIsHovering(true)} onMouseLeave={() => { setIsHovering(false); setHoverValue(null); }}>
-      <button onClick={() => setRating(0)} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '5px', opacity: rating > 0 ? 1 : 0, pointerEvents: rating > 0 ? 'auto' : 'none', transition: 'opacity 0.2s ease', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'absolute', left: '100%', marginLeft: '2px' }} title="Clear rating"><XMarkIcon style={{ width: '16px', color: '#9ca3af' }} /></button>
+    <div className="star-rating-wrapper" style={{ display: 'flex', alignItems: 'center', position: 'relative' }} onMouseEnter={() => setIsHovering(true)} onMouseLeave={() => { setIsHovering(false); setHoverValue(null); }}>
+      <button className="clear-rating-btn" onClick={(e) => { e.stopPropagation(); setRating(0); }} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '5px', display: (isHovering && rating > 0) ? 'flex' : 'none', alignItems: 'center', justifyContent: 'center', position: 'absolute', left: '100%', marginLeft: '10px' }} title="Clear rating"><XMarkIcon style={{ width: '16px', color: '#9ca3af' }} /></button>
       <div style={{ display: 'flex', gap: '4px' }}>
         {[1, 2, 3, 4, 5].map((index) => {
           const isFull = displayValue >= index;
