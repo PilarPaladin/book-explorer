@@ -73,7 +73,7 @@ body {
 .header {
   background-color: var(--color-red);
   color: var(--color-white);
-  padding: 15px 30px;
+  padding: 8px 30px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -482,7 +482,7 @@ body {
 }
 
 .hero-text {
-  font-size: 44px;
+  font-size: clamp(16px, 4.5vw, 44px);
   color: var(--color-white);
   margin: 0;
   line-height: 1.4;
@@ -504,7 +504,7 @@ body {
 }
 
 .welcome-section-title {
-  font-size: 72px;
+  font-size: clamp(32px, 8vw, 72px);
   margin: 0 0 20px 0;
   text-align: center;
 }
@@ -518,7 +518,7 @@ body {
 }
 
 .feature-title {
-  font-size: 48px;
+  font-size: clamp(28px, 6vw, 48px);
   margin: 0 0 20px 0;
 }
 
@@ -545,6 +545,26 @@ body {
   display: none;
 }
 
+.mobile-auth-btn {
+  border-radius: 4px;
+  padding: 6px 8px;
+  font-size: 13px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.mobile-auth-btn-solid {
+  background-color: var(--color-red);
+  color: var(--color-white);
+  border: none;
+}
+
+.mobile-auth-btn-outline {
+  background: none;
+  border: 1px solid var(--color-white);
+  color: var(--color-white);
+}
+
 .mobile-action-btn {
   background: none;
   border: none;
@@ -561,6 +581,35 @@ body {
 
 .mobile-journal {
   display: none;
+}
+
+.welcome-wrapper {
+  width: 100%;
+  max-width: 1600px;
+  margin: 0 auto;
+  background-color: var(--color-white);
+}
+
+.welcome-content {
+  padding: 40px 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+  background-color: var(--color-white);
+  color: var(--color-red);
+}
+
+.welcome-features-container {
+  display: flex;
+  flex-direction: column;
+  gap: 80px;
+}
+
+.feature-image {
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  border-radius: 24px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 /* Auth Modal Styles */
@@ -850,6 +899,34 @@ body {
   padding: 0;
 }
 
+.star-rating-container {
+  position: relative;
+  width: 28px;
+  height: 28px;
+}
+.star-rating-icon {
+  width: 28px;
+}
+
+.activity-review-container {
+  display: flex;
+  gap: 20px;
+}
+
+.activity-review-cover {
+  width: 110px;
+  aspect-ratio: 2 / 3;
+  flex-shrink: 0;
+  border: 1px solid var(--color-gray);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.activity-review-title {
+  font-size: 28px;
+  margin: 0;
+}
+
 /* ==========================================================================
    Responsive Design Media Queries
    ========================================================================== */
@@ -866,7 +943,7 @@ body {
   }
 
   .header {
-    padding: 12px 20px;
+    padding: 10px 10px;
   }
 }
 
@@ -874,8 +951,8 @@ body {
 @media (max-width: 768px) {
   .main-content {
     flex-direction: column;
-    padding: 20px 15px;
-    gap: 30px;
+    padding: 15px;
+    gap: 15px;
   }
 
   .right-column {
@@ -894,9 +971,10 @@ body {
 
   .header {
     flex-direction: column;
-    padding: 15px;
+    padding: 5px;
     gap: 0;
   }
+
 
   .header-top {
     width: 100%;
@@ -906,7 +984,7 @@ body {
   .mobile-auth-buttons {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 5px;
   }
 
   .desktop-auth-buttons {
@@ -998,31 +1076,22 @@ body {
   }
 
   .hero-text {
-    font-size: 16px !important;
+    font-size: clamp(16px, 4.5vw, 14px);
     text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.8);
     text-align: right;
   }
 
   .hero-btn {
     padding: 6px 16px;
-    font-size: 14px;
+    font-size: 9px;
     background-color: var(--color-red);
     color: var(--color-white);
     margin-top: 10px;
   }
 
-  .welcome-section-title {
-    font-size: 42px !important;
-  }
-
   .welcome-section-subtitle {
     font-size: 16px !important;
     margin-bottom: 40px !important;
-  }
-
-  .feature-title {
-    font-size: 28px !important;
-    margin-bottom: 10px !important;
   }
 
   .feature-desc {
@@ -1033,11 +1102,12 @@ body {
     display: none;
   }
 
-  /* Force inline font-sizes to scale down gracefully on mobile for headings */
-  h1.rakkas-regular,
-  h2.rakkas-regular,
-  h3.rakkas-regular {
-    font-size: clamp(28px, 8vw, 42px) !important;
+  .welcome-features-container {
+    gap: 30px;
+  }
+
+  .welcome-content {
+    padding: 15px;
   }
 
   /* Auth Modal Mobile Overrides */
@@ -1218,7 +1288,38 @@ body {
     gap: 15px;
   }
 
+  .fic-actions-block span.inter-regular {
+    font-size: 15px !important;
+  }
+
   .fic-action-btn {
     width: 100%;
+    font-size: 15px !important;
+    gap: 8px;
+  }
+
+  .fic-action-btn svg {
+    width: 22px !important;
+  }
+  
+  .star-rating-container {
+    width: 22px !important;
+    height: 22px !important;
+  }
+  
+  .star-rating-icon {
+    width: 22px !important;
+  }
+  
+  .activity-review-cover {
+    width: 85px;
+  }
+  
+  .activity-review-container {
+    gap: 12px;
+  }
+  
+  .activity-review-title {
+    font-size: clamp(18px, 5vw, 24px) !important;
   }
 }

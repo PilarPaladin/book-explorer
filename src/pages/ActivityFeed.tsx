@@ -89,13 +89,13 @@ function ActivityFeedItem({ item, userActivity, onBookSelect, verbsText, suffix,
 
             {hasReview && (
                 <div style={{ marginTop: '10px' }}>
-                    <div style={{ display: 'flex', alignItems: 'baseline', gap: '10px' }}>
+                    <div style={{ display: 'flex', alignItems: 'baseline', gap: '10px', flexWrap: 'wrap' }}>
                         {onBookSelect && bookState?.bookData ? (
-                            <h4 className="rakkas-regular" style={{ fontSize: '20px', color: 'var(--color-red)', margin: 0, lineHeight: 1, cursor: 'pointer', textDecoration: 'underline' }} onClick={() => onBookSelect(bookState.bookData)}>
+                            <h4 className="rakkas-regular activity-review-title" style={{ color: 'var(--color-red)', margin: 0, lineHeight: 1, cursor: 'pointer', textDecoration: 'underline' }} onClick={() => onBookSelect(bookState.bookData)}>
                                 {item.bookTitle}
                             </h4>
                         ) : (
-                            <h4 className="rakkas-regular" style={{ fontSize: '20px', color: 'var(--color-red)', margin: 0, lineHeight: 1 }}>
+                            <h4 className="rakkas-regular activity-review-title" style={{ color: 'var(--color-red)', margin: 0, lineHeight: 1 }}>
                                 {item.bookTitle}
                             </h4>
                         )}
@@ -112,8 +112,8 @@ function ActivityFeedItem({ item, userActivity, onBookSelect, verbsText, suffix,
                         {item.actions.includes('Loved') && <HeartSolid style={{ width: '14px', color: 'var(--color-red)' }} />}
                     </div>
 
-                    <div style={{ display: 'flex', gap: '15px' }}>
-                        <div style={{ width: '70px', height: '105px', flexShrink: 0, border: '1px solid var(--color-gray)', borderRadius: '4px', overflow: 'hidden' }}>
+                    <div className="activity-review-container">
+                        <div className="activity-review-cover">
                             <img src={coverUrl} alt={item.bookTitle} style={{ width: '100%', height: '100%', display: 'block', objectFit: 'cover' }} onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = '/tempCover.png'; }} />
                         </div>
                         <div style={{ flexGrow: 1 }}>

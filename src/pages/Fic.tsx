@@ -31,8 +31,8 @@ export default function Fic({ book, onBack }: FicProps) {
 
   return (
     <div style={{ width: '100%', padding: '0px 0px 40px 0px' }}>
-      
-      <button 
+
+      <button
         onClick={onBack}
         className="inter-bold"
         style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'none', border: 'none', cursor: 'pointer', padding: 0, color: 'var(--color-dark)', marginBottom: '20px', fontSize: '15px' }}
@@ -105,7 +105,7 @@ export default function Fic({ book, onBack }: FicProps) {
                   <>
                     {displaySynopsis}
                     {isLongSynopsis && (
-                      <button 
+                      <button
                         onClick={() => setIsSynopsisExpanded(!isSynopsisExpanded)}
                         className="inter-regular"
                         style={{ background: 'none', border: 'none', color: 'var(--color-red)', cursor: 'pointer', padding: 0, marginLeft: '8px', fontSize: '15px', textDecoration: 'underline' }}

@@ -70,7 +70,7 @@ function JournalTableRow({ data, onBookSelect, setEditingItem }: JournalTableRow
               <span className="rakkas-regular" style={{ color: 'var(--color-red)', fontSize: '25px', fontWeight: 'bold', letterSpacing: '1.5px', lineHeight: 1.2 }}>{item.bookTitle}</span>
             )}
             <span className="inter-regular" style={{ color: 'var(--color-dark)', fontSize: '14px', marginTop: '4px' }}>
-              {bookState?.bookData?.author_name || ''}
+              {bookState?.bookData?.author_name?.join(', ') || ''}
             </span>
           </div>
         </div>
@@ -259,7 +259,10 @@ export default function Journal({ onBookSelect }: JournalProps) {
                         <span className="inter-bold" style={{ fontSize: '20px', color: 'var(--color-red)' }}>{item.bookTitle}</span>
                       )}
                       <span className="inter-regular" style={{ fontSize: '12px', color: 'var(--color-dark)' }}>
-                        {bookState?.bookData?.author_name || ''}
+                        {(() => {
+                          const authorText = bookState?.bookData?.author_name?.join(', ') || '';
+                          return authorText.length > 21 ? authorText.substring(0, 21) + '...' : authorText;
+                        })()}
                       </span>
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>

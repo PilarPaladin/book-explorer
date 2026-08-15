@@ -147,7 +147,6 @@ function App() {
 
       {!isLoggedIn ? (
         <Welcome 
-          setIsLoggedIn={setIsLoggedIn} 
           onGetStarted={() => { setAuthModalType('register'); setIsAuthModalOpen(true); }} 
         />
       ) : (

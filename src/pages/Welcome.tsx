@@ -1,7 +1,6 @@
 import React from 'react';
 
 interface WelcomeProps {
-    setIsLoggedIn: (isLoggedIn: boolean) => void;
     onGetStarted: () => void;
 }
 
@@ -22,20 +21,15 @@ function FeatureBlock({ title, description, imageSrc, imageLeft = false }: Featu
                 </p>
             </div>
             <div className="feature-content">
-                <img src={imageSrc} alt={title} style={{ width: '100%', borderRadius: '24px', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }} />
+                <img src={imageSrc} alt={title} className="feature-image" />
             </div>
         </div>
     );
 }
 
-export default function Welcome({ setIsLoggedIn, onGetStarted }: WelcomeProps) {
+export default function Welcome({ onGetStarted }: WelcomeProps) {
     return (
-        <div style={{
-            width: '100%',
-            maxWidth: '1600px',
-            margin: '0 auto',
-            backgroundColor: 'var(--color-white)'
-        }}>
+        <div className="welcome-wrapper">
             {/* Banner Section */}
             <div className="welcome-banner">
                 <img src="/welcomebanner.png" alt="Welcome Banner" className="welcome-banner-img" />
@@ -53,7 +47,7 @@ export default function Welcome({ setIsLoggedIn, onGetStarted }: WelcomeProps) {
             </div>
 
             {/* How it works section */}
-            <div style={{ padding: '1px 20px', maxWidth: '1200px', margin: '0 auto', backgroundColor: 'var(--color-white)', color: 'var(--color-red)' }}>
+            <div className="welcome-content">
                 <h2 className="rakkas-regular welcome-section-title">
                     How myArkived works
                 </h2>
@@ -62,7 +56,7 @@ export default function Welcome({ setIsLoggedIn, onGetStarted }: WelcomeProps) {
                     <strong>Sign in</strong> or <strong>register</strong> to unlock your personal vault. Curate your readlist with private custom images, and track your stats all in one place— completely for free.
                 </p>
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '80px' }}>
+                <div className="welcome-features-container">
                     
                     <FeatureBlock 
                         title="Log what you've read"

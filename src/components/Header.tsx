@@ -78,10 +78,10 @@ export default function Header({
           </div>
         ) : (
           <div className="mobile-auth-buttons">
-            <button className="inter-bold" onClick={() => { onRegisterClick?.(); setIsMobileMenuOpen(false); }} style={{ backgroundColor: 'var(--color-red)', color: 'var(--color-white)', border: 'none', borderRadius: '4px', padding: '6px 12px', fontSize: '14px', cursor: 'pointer' }}>
+            <button className="inter-bold mobile-auth-btn mobile-auth-btn-solid" onClick={() => { onRegisterClick?.(); setIsMobileMenuOpen(false); }}>
               Sign Up
             </button>
-            <button className="inter-bold" onClick={() => { onLoginClick?.(); setIsMobileMenuOpen(false); }} style={{ background: 'none', border: '1px solid var(--color-white)', color: 'var(--color-white)', borderRadius: '4px', padding: '6px 12px', fontSize: '14px', cursor: 'pointer' }}>
+            <button className="inter-bold mobile-auth-btn mobile-auth-btn-outline" onClick={() => { onLoginClick?.(); setIsMobileMenuOpen(false); }}>
               Log In
             </button>
           </div>
