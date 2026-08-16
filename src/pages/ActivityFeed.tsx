@@ -1,0 +1,197 @@
+import { useState, useEffect } from 'react';
+import { getRecentActivity, RecentActivityItem } from '../services/activityLogger';
+import { HeartIcon as HeartSolid, StarIcon as StarSolid } from '@heroicons/react/24/solid';
+import { getRelativeTimeStrict } from '../utils/timeFormat';
+
+function formatActions(actions: string[]) {
+    const verbMap: Record<string, string> = {
+        'Started': 'started',
+        'Finished': 'finished',
+        'Loved': 'liked',
+        'Rated': 'rated',
+        'Reviewed': 'reviewed',
+        'Bookmarked': 'bookmarked',
+        'Added to Readlist': 'added'
+    };
+
+    const verbs = actions.map(a => verbMap[a] || a.toLowerCase());
+
+    if (verbs.includes('added')) {
+        return { verbsText: 'added', suffix: 'to your readlist' };
+    }
+
+    let verbsText = '';
+    if (verbs.length === 1) {
+        verbsText = verbs[0];
+    } else if (verbs.length === 2) {
+        verbsText = `${verbs[0]} and ${verbs[1]}`;
+    } else if (verbs.length > 2) {
+        verbsText = `${verbs.slice(0, -1).join(', ')} and ${verbs[verbs.length - 1]}`;
+    }
+
+    return { verbsText, suffix: '' };
+}
+
+interface ActivityFeedProps {
+    onBookSelect?: (book: any) => void;
+}
+
+interface ActivityFeedItemProps {
+    item: RecentActivityItem;
+    userActivity: any;
+    onBookSelect?: (book: any) => void;
+    verbsText: string;
+    suffix: string;
+    dateStr: string;
+    relTime: string;
+}
+
+function ActivityFeedItem({ item, userActivity, onBookSelect, verbsText, suffix, dateStr, relTime }: ActivityFeedItemProps) {
+    const hasReview = !!item.review;
+    const bookState = userActivity[item.bookKey];
+    const coverUrl = bookState?.bookData?.cover_i
+        ? `https://covers.openlibrary.org/b/id/${bookState.bookData.cover_i}-M.jpg`
+        : '/tempCover.png';
+    const author = bookState?.bookData?.author_name?.[0] || '';
+
+    return (
+        <div style={{ borderBottom: '1px solid var(--color-gray)', padding: '15px 0' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                <div className="inter-regular" style={{ color: 'var(--color-dark)', fontSize: '15px' }}>
+                    You {verbsText}{hasReview && suffix ? ` ${suffix}` : ''}
+                    {!hasReview ? (
+                        <>
+                            {' '}
+                            {onBookSelect && bookState?.bookData ? (
+                                <strong
+                                    className="rakkas-regular" style={{ fontSize: '17px', color: 'var(--color-red)', cursor: 'pointer', textDecoration: 'underline', letterSpacing: '1.5px' }}
+                                    onClick={() => onBookSelect(bookState.bookData)}
+                                >
+                                    {item.bookTitle}
+                                </strong>
+                            ) : (
+                                <strong style={{ color: 'var(--color-red)', fontWeight: 'bold' }}>{item.bookTitle}</strong>
+                            )}
+                            {item.isReread ? ' again' : ''}
+                            {!hasReview && suffix ? ` ${suffix}` : ''}
+                            {item.rating ? (
+                                <span style={{ marginLeft: '6px', color: 'var(--color-dark)', fontSize: '12px', verticalAlign: 'middle', display: 'inline-flex', gap: '1px' }}>
+                                    {[...Array(Math.max(0, Math.floor(Number(item.rating) || 0)))].map((_, i) => <StarSolid key={i} style={{ width: '13px' }} />)}
+                                </span>
+                            ) : null}
+                            {dateStr}
+                        </>
+                    ) : null}
+                </div>
+                <div className="inter-regular" style={{ color: 'var(--color-gray)', fontSize: '14px', minWidth: '40px', textAlign: 'right', flexShrink: 0, paddingLeft: '10px' }}>
+                    {relTime}
+                </div>
+            </div>
+
+            {hasReview && (
+                <div style={{ marginTop: '10px' }}>
+                    <div style={{ display: 'flex', alignItems: 'baseline', gap: '10px', flexWrap: 'wrap' }}>
+                        {onBookSelect && bookState?.bookData ? (
+                            <h4 className="rakkas-regular activity-review-title" style={{ color: 'var(--color-red)', margin: 0, lineHeight: 1, cursor: 'pointer', textDecoration: 'underline' }} onClick={() => onBookSelect(bookState.bookData)}>
+                                {item.bookTitle}
+                            </h4>
+                        ) : (
+                            <h4 className="rakkas-regular activity-review-title" style={{ color: 'var(--color-red)', margin: 0, lineHeight: 1 }}>
+                                {item.bookTitle}
+                            </h4>
+                        )}
+                        {item.isReread && <span className="inter-regular" style={{ color: 'var(--color-dark)', fontSize: '15px' }}>again</span>}
+                        {author && <span className="inter-regular" style={{ color: 'var(--color-dark)', fontWeight: 'bold', fontSize: '12px' }}>{author}</span>}
+                    </div>
+
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '6px', marginBottom: '12px' }}>
+                        {item.rating ? (
+                            <div style={{ display: 'flex', color: 'var(--color-dark)', gap: '1px' }}>
+                                {[...Array(Math.max(0, Math.floor(Number(item.rating) || 0)))].map((_, i) => <StarSolid key={i} style={{ width: '14px' }} />)}
+                            </div>
+                        ) : null}
+                        {item.actions.includes('Loved') && <HeartSolid style={{ width: '14px', color: 'var(--color-red)' }} />}
+                    </div>
+
+                    <div className="activity-review-container">
+                        <div className="activity-review-cover">
+                            <img src={coverUrl} alt={item.bookTitle} style={{ width: '100%', height: '100%', display: 'block', objectFit: 'cover' }} onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = '/tempCover.png'; }} />
+                        </div>
+                        <div style={{ flexGrow: 1 }}>
+                            <p className="inter-regular" style={{ color: 'var(--color-dark)', fontSize: '15px', lineHeight: 1.5, margin: '0 0 10px 0', whiteSpace: 'pre-wrap' }}>
+                                {item.review}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+}
+
+export default function ActivityFeed({ onBookSelect }: ActivityFeedProps) {
+    const [activities, setActivities] = useState<RecentActivityItem[]>([]);
+    const [userActivity, setUserActivity] = useState<any>({});
+
+    useEffect(() => {
+        setActivities(getRecentActivity());
+
+        const stored = localStorage.getItem('userActivity');
+        if (stored) {
+            try {
+                setUserActivity(JSON.parse(stored));
+            } catch { }
+        }
+
+        const handleRecent = () => setActivities(getRecentActivity());
+        window.addEventListener('recent-activity-updated', handleRecent);
+        return () => window.removeEventListener('recent-activity-updated', handleRecent);
+    }, []);
+
+    return (
+        <div className="page-container">
+            <div className="page-header-container">
+                <h2 className="rakkas-regular page-title">
+                    My Activity
+                </h2>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+                {activities.length === 0 ? (
+                    <div className="inter-bold" style={{ textAlign: 'center', padding: '50px', color: 'var(--color-dark)', fontSize: '16px' }}>
+                        No activity yet. Start interacting with fics!
+                    </div>
+                ) : (
+                    activities.map(item => {
+                        const relTime = getRelativeTimeStrict(item.timestamp);
+                        const { verbsText, suffix } = formatActions(item.actions);
+
+                        let dateStr = '';
+                        const userDate = item.startedDate || item.finishedDate;
+                        if (userDate) {
+                            const d = new Date(userDate);
+                            d.setMinutes(d.getMinutes() + d.getTimezoneOffset());
+                            const month = d.toLocaleString('en-US', { month: 'short' });
+                            const day = d.getDate();
+                            const year = d.getFullYear();
+                            dateStr = ` on ${d.toLocaleString('en-US', { weekday: 'long' })} ${month} ${day}, ${year}`;
+                        }
+
+                        return (
+                            <ActivityFeedItem
+                                key={item.id}
+                                item={item}
+                                userActivity={userActivity}
+                                onBookSelect={onBookSelect}
+                                verbsText={verbsText}
+                                suffix={suffix}
+                                dateStr={dateStr}
+                                relTime={relTime}
+                            />
+                        );
+                    })
+                )}
+            </div>
+        </div>
+    );
+}
