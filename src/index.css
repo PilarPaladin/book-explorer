@@ -1515,9 +1515,8 @@ body {
 .readlist-count-text {
   font-size: 16px;
   color: var(--color-dark);
-  margin: 0 0 25px 0;
+  margin: 0 0 0 0;
   padding-bottom: 10px;
-  border-bottom: 2px solid var(--color-red);
 }
 
 /* Bookmark Modal Specific Styles */
@@ -1767,27 +1766,27 @@ body {
     gap: 15px;
     margin-top: 10px;
   }
-  
+
   .profile-name-large {
     font-size: 32px;
   }
-  
+
   .profile-stats-row {
     justify-content: space-around;
     gap: 20px;
   }
-  
+
   .profile-stat-item {
     align-items: center;
   }
-  
+
   .profile-fav-reads-grid {
     display: grid;
     grid-template-columns: repeat(3, minmax(80px, 110px));
     justify-content: center;
     gap: 15px;
   }
-  
+
   .profile-fav-book-cover-container {
     width: 100%;
   }

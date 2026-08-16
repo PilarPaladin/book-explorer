@@ -27,7 +27,7 @@ export default function Home({ isLoading, books, setSelectedBook }: HomeProps) {
 
     return (
         <>
-            <h2 className="rakkas-regular" style={{ fontSize: 'clamp(28px, 6vw, 42px)', color: '#990000', margin: '0 0 30px 0' }}>
+            <h2 className="rakkas-regular page-title" style={{ textAlign: 'center' }}>
                 Welcome back, {username}. Here's what's been happening...
             </h2>
 

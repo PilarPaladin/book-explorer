@@ -184,9 +184,9 @@ export default function Journal({ onBookSelect }: JournalProps) {
   });
 
   return (
-    <div style={{ width: '100%' }}>
-      <div className="journal-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', borderBottom: '2px solid var(--color-red)', paddingBottom: '10px', marginBottom: '20px' }}>
-        <h2 className="rakkas-regular" style={{ fontSize: 'clamp(28px, 6vw, 42px)', color: '#990000', margin: '0 0 5px 0' }}>
+    <div className="page-container">
+      <div className="page-header-container">
+        <h2 className="rakkas-regular page-title">
           My Journal
         </h2>
       </div>
