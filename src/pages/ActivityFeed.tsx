@@ -149,7 +149,7 @@ export default function ActivityFeed({ onBookSelect }: ActivityFeedProps) {
     }, []);
 
     return (
-        <div style={{ width: '100%' }}>
+        <div className="page-container">
             <div className="page-header-container">
                 <h2 className="rakkas-regular page-title">
                     My Activity

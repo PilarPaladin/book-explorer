@@ -43,7 +43,7 @@ export default function Results({ searchQuery, onBookSelect }: ResultsProps) {
     const totalPages = Math.ceil(totalResults / itemsPerPage);
 
     return (
-        <div style={{ width: '100%' }}>
+        <div className="page-container">
             <div className="page-header-container">
                 <h2 className="rakkas-regular page-title">
                     Results for "{searchQuery}"
