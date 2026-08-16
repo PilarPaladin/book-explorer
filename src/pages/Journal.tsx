@@ -185,8 +185,8 @@ export default function Journal({ onBookSelect }: JournalProps) {
 
   return (
     <div style={{ width: '100%' }}>
-      <div className="journal-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', borderBottom: '2px solid var(--color-red)', paddingBottom: '10px', marginBottom: '20px' }}>
-        <h2 className="rakkas-regular" style={{ fontSize: 'clamp(28px, 6vw, 42px)', color: '#990000', margin: '0 0 5px 0' }}>
+      <div className="page-header-container">
+        <h2 className="rakkas-regular page-title">
           My Journal
         </h2>
       </div>
@@ -197,7 +197,7 @@ export default function Journal({ onBookSelect }: JournalProps) {
             <tr>
               <th className="inter-bold" style={{ width: '70px', padding: '15px 0', textAlign: 'center', borderBottom: '1px solid var(--color-gray)' }}>MONTH</th>
               <th className="inter-bold" style={{ width: '50px', padding: '15px 0', textAlign: 'center', borderBottom: '1px solid var(--color-gray)' }}>DAY</th>
-              <th className="inter-bold" style={{ padding: '15px 0', textAlign: 'left', paddingLeft: '20px', borderBottom: '1px solid var(--color-gray)' }}>FIC</th>
+              <th className="inter-bold" style={{ padding: '15px 0', textAlign: 'left', paddingLeft: '20px', borderBottom: '1px solid var(--color-gray)' }}>BOOK</th>
               <th className="inter-bold" style={{ width: '90px', padding: '15px 0', textAlign: 'center', borderBottom: '1px solid var(--color-gray)' }}>STATUS</th>
               <th className="inter-bold" style={{ width: '110px', padding: '15px 0', textAlign: 'center', borderBottom: '1px solid var(--color-gray)' }}>RATING</th>
               <th className="inter-bold" style={{ width: '60px', padding: '15px 0', textAlign: 'center', borderBottom: '1px solid var(--color-gray)' }}>LIKE</th>

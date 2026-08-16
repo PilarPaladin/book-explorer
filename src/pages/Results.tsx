@@ -44,9 +44,11 @@ export default function Results({ searchQuery, onBookSelect }: ResultsProps) {
 
     return (
         <div style={{ width: '100%' }}>
-            <h2 className="rakkas-regular" style={{ fontSize: 'clamp(28px, 6vw, 42px)', color: '#990000', margin: '0 0 25px 0', paddingBottom: '10px', borderBottom: '2px solid var(--color-red)' }}>
-                Results for "{searchQuery}"
-            </h2>
+            <div className="page-header-container">
+                <h2 className="rakkas-regular page-title">
+                    Results for "{searchQuery}"
+                </h2>
+            </div>
 
             {isLoading ? (
                 <LoadingGrid count={itemsPerPage} />

@@ -46,15 +46,17 @@ export default function Readlist({ onBookSelect }: ReadlistProps) {
 
   return (
     <div className="page-container">
-      <h2 className="rakkas-regular page-title">
-        My Readlist
-      </h2>
+      <div className="page-header-container">
+        <h2 className="rakkas-regular page-title">
+          My Readlist
+        </h2>
+        {books.length > 0 && (
+          <p className="inter-regular readlist-count-text">
+            You want to read {books.length} book{books.length === 1 ? '' : 's'}
+          </p>
+        )}
+      </div>
 
-      {books.length > 0 && (
-        <p className="inter-regular readlist-count-text">
-          You want to read {books.length} book{books.length === 1 ? '' : 's'}
-        </p>
-      )}
 
       {books.length === 0 ? (
         <div className="inter-bold empty-state-message">

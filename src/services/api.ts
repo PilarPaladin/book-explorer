@@ -1,6 +1,6 @@
 import { Book } from '../components/BookCard';
 
-export const searchBooks = async (query: string, page: number = 1, limit: number = 24): Promise<{docs: Book[], numFound: number}> => {
+export const searchBooks = async (query: string, page: number = 1, limit: number = 24): Promise<{ docs: Book[], numFound: number }> => {
   const url = `https://openlibrary.org/search.json?q=${encodeURIComponent(query)}&page=${page}&limit=${limit}`;
   const response = await fetch(url);
   if (!response.ok) {

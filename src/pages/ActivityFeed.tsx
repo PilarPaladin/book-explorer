@@ -150,8 +150,8 @@ export default function ActivityFeed({ onBookSelect }: ActivityFeedProps) {
 
     return (
         <div style={{ width: '100%' }}>
-            <div style={{ borderBottom: '2px solid var(--color-red)', paddingBottom: '10px', marginBottom: '20px' }}>
-                <h2 className="rakkas-regular" style={{ fontSize: 'clamp(28px, 6vw, 42px)', color: '#990000', margin: '0 0 5px 0' }}>
+            <div className="page-header-container">
+                <h2 className="rakkas-regular page-title">
                     My Activity
                 </h2>
             </div>

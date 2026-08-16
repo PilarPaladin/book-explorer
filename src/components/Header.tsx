@@ -2,9 +2,6 @@ import React, { useState } from 'react';
 import { MagnifyingGlassIcon, Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
 
 interface HeaderProps {
-  isLoggedIn: boolean;
-  onLoginClick?: () => void;
-  onRegisterClick?: () => void;
   setCurrentPage: (page: string) => void;
   handleSearch: (e: React.FormEvent<HTMLFormElement>) => void;
   searchQuery: string;
@@ -13,9 +10,6 @@ interface HeaderProps {
 }
 
 export default function Header({
-  isLoggedIn,
-  onLoginClick,
-  onRegisterClick,
   setCurrentPage,
   handleSearch,
   searchQuery,
@@ -33,7 +27,7 @@ export default function Header({
         setCurrentUser(JSON.parse(storedUser));
       } catch { }
     }
-  }, [isLoggedIn]);
+  }, []);
 
   const username = currentUser?.username || 'Guest';
   const avatarLetter = username.charAt(0).toUpperCase();
@@ -53,8 +47,7 @@ export default function Header({
           </div>
         </div>
 
-        {isLoggedIn ? (
-          <div className="mobile-actions" style={{ flexGrow: isMobileSearchOpen ? 1 : 0, marginLeft: isMobileSearchOpen ? '10px' : '0' }}>
+        <div className="mobile-actions" style={{ flexGrow: isMobileSearchOpen ? 1 : 0, marginLeft: isMobileSearchOpen ? '10px' : '0' }}>
             <button className="mobile-action-btn" onClick={() => handleNavClick('profile')} style={{ flexShrink: 0, padding: '0 5px', marginRight: '5px' }}>
               <div className="avatar inter-bold" style={{ width: '28px', height: '28px', fontSize: '14px', border: '1px solid var(--color-white)', color: 'var(--color-dark)', backgroundColor: '#e5e7eb' }}>
                 {avatarLetter}
@@ -95,23 +88,11 @@ export default function Header({
               {isMobileMenuOpen ? <XMarkIcon style={{ width: '28px' }} /> : <Bars3Icon style={{ width: '28px' }} />}
             </button>
           </div>
-        ) : (
-          <div className="mobile-auth-buttons">
-            <button className="inter-bold mobile-auth-btn mobile-auth-btn-solid" onClick={() => { onRegisterClick?.(); setIsMobileMenuOpen(false); }}>
-              Sign Up
-            </button>
-            <button className="inter-bold mobile-auth-btn mobile-auth-btn-outline" onClick={() => { onLoginClick?.(); setIsMobileMenuOpen(false); }}>
-              Log In
-            </button>
-          </div>
-        )}
       </div>
 
 
-      <nav className={`header-nav inter-bold ${isLoggedIn && isMobileMenuOpen ? 'mobile-open' : ''} ${!isLoggedIn ? 'desktop-only' : ''}`}>
-        {isLoggedIn ? (
-          <>
-            <div className="nav-links">
+      <nav className={`header-nav inter-bold ${isMobileMenuOpen ? 'mobile-open' : ''}`}>
+        <div className="nav-links">
               <a href="#" className="nav-link" onClick={(e) => { e.preventDefault(); handleNavClick('bookmarks'); }}>Bookmarks</a>
               <a href="#" className="nav-link" onClick={(e) => { e.preventDefault(); handleNavClick('readlist'); }}>Readlist</a>
               <a href="#" className="nav-link" onClick={(e) => { e.preventDefault(); handleNavClick('journal'); }}>Journal</a>
@@ -144,17 +125,6 @@ export default function Header({
               <div className="avatar inter-bold" style={{ width: '24px', height: '24px', fontSize: '12px' }}>{avatarLetter}</div>
               {username}
             </a>
-          </>
-        ) : (
-          <div className="desktop-auth-buttons" style={{ display: 'flex', gap: '15px' }}>
-            <button className="inter-bold" onClick={() => { onRegisterClick?.(); setIsMobileMenuOpen(false); }} style={{ backgroundColor: 'var(--color-red)', color: 'var(--color-white)', border: 'none', borderRadius: '4px', padding: '8px 16px', fontSize: '15px', cursor: 'pointer' }}>
-              Sign Up
-            </button>
-            <button className="inter-bold" onClick={() => { onLoginClick?.(); setIsMobileMenuOpen(false); }} style={{ background: 'none', border: '1px solid var(--color-white)', color: 'var(--color-white)', borderRadius: '4px', padding: '8px 16px', fontSize: '15px', cursor: 'pointer' }}>
-              Log In
-            </button>
-          </div>
-        )}
       </nav>
     </header>
   );

@@ -4,7 +4,6 @@ import toast, { Toaster } from 'react-hot-toast';
 import Bookmarks from './pages/Bookmarks';
 import Readlist from './pages/Readlist';
 import Journal from './pages/Journal';
-import Welcome from './pages/Welcome';
 import Home from './pages/Home';
 import Activity from './pages/ActivityFeed';
 import Profile from './pages/Profile';
@@ -16,9 +15,6 @@ import Fic from './pages/Fic';
 import Results from './pages/Results';
 import FinishedModal from './components/FinishedModal';
 import { useBookActivity } from './hooks/useBookActivity';
-import SignUpModal from './components/SignUpModal';
-import LogInModal from './components/LogInModal';
-import GuestModal from './components/GuestModal';
 
 function LogModalWrapper({ book, onClose }: { book: Book, onClose: () => void }) {
   const { activity, updateActivity } = useBookActivity(book);
@@ -33,7 +29,6 @@ function LogModalWrapper({ book, onClose }: { book: Book, onClose: () => void })
 }
 
 function App() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false); // Simulated auth state
   const [currentPage, setCurrentPage] = useState('home');
   const [previousPage, setPreviousPage] = useState('home');
 
@@ -50,11 +45,12 @@ function App() {
   const [displayedQuery, setDisplayedQuery] = useState('');
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
   const [selectedBookToLog, setSelectedBookToLog] = useState<Book | null>(null);
-  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-  const [authModalType, setAuthModalType] = useState<'register' | 'login'>('register');
-  const [isGuestModalOpen, setIsGuestModalOpen] = useState(false);
 
   useEffect(() => {
+    if (!localStorage.getItem('currentUser')) {
+      localStorage.setItem('currentUser', JSON.stringify({ username: 'Guest', isGuest: true }));
+    }
+    
     const fetchInitial = async () => {
       setIsLoading(true);
       try {
@@ -138,9 +134,6 @@ function App() {
         }}
       />
       <Header
-        isLoggedIn={isLoggedIn}
-        onLoginClick={() => { setAuthModalType('login'); setIsAuthModalOpen(true); }}
-        onRegisterClick={() => { setAuthModalType('register'); setIsAuthModalOpen(true); }}
         setCurrentPage={navigate}
         handleSearch={handleSearch}
         searchQuery={searchQuery}
@@ -148,19 +141,13 @@ function App() {
         setIsLogModalOpen={setIsLogModalOpen}
       />
 
-      {!isLoggedIn ? (
-        <Welcome 
-          onGetStarted={() => { setAuthModalType('register'); setIsAuthModalOpen(true); }} 
-        />
-      ) : (
-        <main className="main-content">
-          <div className="left-column">
-            {renderPage()}
-          </div>
+      <main className="main-content">
+        <div className="left-column">
+          {renderPage()}
+        </div>
 
-          <Sidebar isLoading={isLoading} setCurrentPage={navigate} onBookSelect={(book) => { setSelectedBook(book); navigate('fic'); }} />
-        </main>
-      )}
+        <Sidebar isLoading={isLoading} setCurrentPage={navigate} onBookSelect={(book) => { setSelectedBook(book); navigate('fic'); }} />
+      </main>
 
       {isLogModalOpen && (
         <SearchModal 
@@ -173,34 +160,6 @@ function App() {
         <LogModalWrapper 
           book={selectedBookToLog} 
           onClose={() => setSelectedBookToLog(null)} 
-        />
-      )}
-
-      {isAuthModalOpen && authModalType === 'register' && (
-        <SignUpModal
-          onClose={() => setIsAuthModalOpen(false)}
-          onSwitchToLogin={() => setAuthModalType('login')}
-          onGuestLogin={() => { setIsAuthModalOpen(false); setIsGuestModalOpen(true); }}
-        />
-      )}
-      
-      {isAuthModalOpen && authModalType === 'login' && (
-        <LogInModal
-          onClose={() => setIsAuthModalOpen(false)}
-          onSwitchToRegister={() => setAuthModalType('register')}
-          onLoginSuccess={() => setIsLoggedIn(true)}
-          onGuestLogin={() => { setIsAuthModalOpen(false); setIsGuestModalOpen(true); }}
-        />
-      )}
-
-      {isGuestModalOpen && (
-        <GuestModal
-          onClose={() => setIsGuestModalOpen(false)}
-          onConfirm={() => {
-            setIsGuestModalOpen(false);
-            localStorage.setItem('currentUser', JSON.stringify({ username: 'Guest', isGuest: true }));
-            setIsLoggedIn(true);
-          }}
         />
       )}
     </div>
