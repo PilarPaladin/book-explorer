@@ -1673,3 +1673,132 @@ body {
     opacity: 1;
   }
 }
+
+/* Profile Page Specific Styles */
+.profile-header-expanded {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 30px;
+  margin-top: 20px;
+}
+
+.profile-avatar-large {
+  width: 80px;
+  height: 80px;
+  font-size: 36px;
+}
+
+.profile-name-large {
+  font-size: 42px;
+  margin: 0;
+  color: var(--color-red);
+}
+
+.profile-stats-row {
+  display: flex;
+  gap: 40px;
+  justify-content: flex-start;
+  margin-bottom: 40px;
+}
+
+.profile-stat-item {
+  align-items: flex-start;
+}
+
+.profile-stat-value {
+  font-size: 24px;
+}
+
+.profile-stat-label {
+  font-size: 14px;
+}
+
+.profile-section-title {
+  font-size: 16px;
+  color: var(--color-dark);
+  border-bottom: 1px solid var(--color-gray);
+  padding-bottom: 10px;
+  margin-bottom: 20px;
+}
+
+.profile-fav-reads-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  margin-bottom: 40px;
+}
+
+.profile-fav-book-cover-container {
+  width: 200px;
+  aspect-ratio: 2 / 3;
+}
+
+.profile-activity-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.profile-activity-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 10px 0;
+}
+
+.profile-activity-text {
+  padding-right: 10px;
+  font-size: 15px;
+}
+
+.profile-activity-time {
+  color: var(--color-gray);
+  font-size: 13px;
+  min-width: 40px;
+  text-align: right;
+  white-space: nowrap;
+}
+
+@media (max-width: 768px) {
+  .profile-header-expanded {
+    flex-direction: column;
+    text-align: center;
+    gap: 15px;
+    margin-top: 10px;
+  }
+  
+  .profile-name-large {
+    font-size: 32px;
+  }
+  
+  .profile-stats-row {
+    justify-content: space-around;
+    gap: 20px;
+  }
+  
+  .profile-stat-item {
+    align-items: center;
+  }
+  
+  .profile-fav-reads-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(80px, 110px));
+    justify-content: center;
+    gap: 15px;
+  }
+  
+  .profile-fav-book-cover-container {
+    width: 100%;
+  }
+
+  .profile-activity-item {
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .profile-activity-time {
+    text-align: left;
+    min-width: auto;
+  }
+}

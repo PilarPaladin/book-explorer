@@ -7,6 +7,7 @@ import Journal from './pages/Journal';
 import Welcome from './pages/Welcome';
 import Home from './pages/Home';
 import Activity from './pages/ActivityFeed';
+import Profile from './pages/Profile';
 import Sidebar from './components/Sidebar';
 import { Book } from './components/BookCard';
 import SearchModal from './components/SearchModal';
@@ -101,6 +102,8 @@ function App() {
         return <Journal onBookSelect={(book) => { setSelectedBook(book); navigate('fic'); }} />;
       case 'activity':
         return <Activity onBookSelect={(book) => { setSelectedBook(book); navigate('fic'); }} />;
+      case 'profile':
+        return <Profile onBookSelect={(book) => { setSelectedBook(book); navigate('fic'); }} />;
       case 'fic':
         return selectedBook ? (
           <Fic book={selectedBook} onBack={() => { navigate(previousPage); setSelectedBook(null); }} />

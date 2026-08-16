@@ -24,6 +24,19 @@ export default function Header({
 }: HeaderProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
+  const [currentUser, setCurrentUser] = React.useState<any>(null);
+
+  React.useEffect(() => {
+    const storedUser = localStorage.getItem('currentUser');
+    if (storedUser) {
+      try {
+        setCurrentUser(JSON.parse(storedUser));
+      } catch { }
+    }
+  }, [isLoggedIn]);
+
+  const username = currentUser?.username || 'Guest';
+  const avatarLetter = username.charAt(0).toUpperCase();
 
   const handleNavClick = (page: string) => {
     setCurrentPage(page);
@@ -42,6 +55,12 @@ export default function Header({
 
         {isLoggedIn ? (
           <div className="mobile-actions" style={{ flexGrow: isMobileSearchOpen ? 1 : 0, marginLeft: isMobileSearchOpen ? '10px' : '0' }}>
+            <button className="mobile-action-btn" onClick={() => handleNavClick('profile')} style={{ flexShrink: 0, padding: '0 5px', marginRight: '5px' }}>
+              <div className="avatar inter-bold" style={{ width: '28px', height: '28px', fontSize: '14px', border: '1px solid var(--color-white)', color: 'var(--color-dark)', backgroundColor: '#e5e7eb' }}>
+                {avatarLetter}
+              </div>
+            </button>
+
             <button className="inter-bold" onClick={() => { setIsLogModalOpen(true); setIsMobileMenuOpen(false); }} style={{
               backgroundColor: 'var(--color-red)', color: 'white', border: '1px solid var(--color-white)',
               borderRadius: '4px', padding: '6px 10px', fontSize: '13px', cursor: 'pointer',
@@ -99,6 +118,7 @@ export default function Header({
               <a href="#" className="nav-link" onClick={(e) => { e.preventDefault(); handleNavClick('activity'); }}>Activity</a>
             </div>
 
+
             <form className="search-container desktop-search" onSubmit={(e) => { handleSearch(e); setIsMobileMenuOpen(false); }} style={{ margin: 0, height: '36px', display: 'flex', position: 'relative', alignItems: 'center' }}>
               <input
                 type="text"
@@ -112,7 +132,6 @@ export default function Header({
                 <MagnifyingGlassIcon style={{ width: '18px' }} />
               </button>
             </form>
-            
             <button className="inter-bold desktop-log-btn" onClick={() => { setIsLogModalOpen(true); setIsMobileMenuOpen(false); }} style={{
               backgroundColor: 'var(--color-red)', color: 'white', border: '2px solid var(--color-white)',
               borderRadius: '4px', padding: '8px 16px', fontSize: '15px', cursor: 'pointer',
@@ -121,6 +140,10 @@ export default function Header({
             }}>
               + LOG
             </button>
+            <a href="#" className="nav-link desktop-only" onClick={(e) => { e.preventDefault(); handleNavClick('profile'); }} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <div className="avatar inter-bold" style={{ width: '24px', height: '24px', fontSize: '12px' }}>{avatarLetter}</div>
+              {username}
+            </a>
           </>
         ) : (
           <div className="desktop-auth-buttons" style={{ display: 'flex', gap: '15px' }}>
