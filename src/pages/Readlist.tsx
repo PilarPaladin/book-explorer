@@ -46,11 +46,9 @@ export default function Readlist({ onBookSelect }: ReadlistProps) {
 
   return (
     <div className="page-container">
-      <div className="page-header-container">
-        <h2 className="rakkas-regular page-title">
-          My Readlist
-        </h2>
-      </div>
+      <h2 className="rakkas-regular page-title">
+        My Readlist
+      </h2>
 
       {books.length > 0 && (
         <p className="inter-regular readlist-count-text">

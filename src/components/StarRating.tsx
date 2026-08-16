@@ -22,7 +22,7 @@ export default function StarRating({ rating, setRating }: StarRatingProps) {
   return (
     <div className="star-rating-wrapper" style={{ display: 'flex', alignItems: 'center', position: 'relative' }} onMouseLeave={() => setHoverValue(null)}>
       <button className="clear-rating-btn" onClick={(e) => { e.stopPropagation(); setRating(0); }} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '5px 5px 5px 15px', display: rating > 0 ? 'flex' : 'none', alignItems: 'center', justifyContent: 'center', position: 'absolute', left: '100%' }} title="Clear rating"><XMarkIcon style={{ width: '16px', color: '#9ca3af' }} /></button>
-      <div style={{ display: 'flex', gap: '4px' }} onClick={() => setRating(displayValue === rating ? 0 : displayValue)}>
+      <div style={{ display: 'flex', gap: '4px' }} onClick={() => setRating(displayValue)}>
         {[1, 2, 3, 4, 5].map((index) => {
           const isFull = displayValue >= index;
           const isHalf = displayValue >= index - 0.5 && displayValue < index;
