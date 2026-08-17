@@ -4,9 +4,17 @@ import { EyeIcon as EyeSolid, HeartIcon as HeartSolid, BookmarkIcon as BookmarkS
 import { Book } from '../components/BookCard';
 import { useBookActivity } from '../hooks/useBookActivity';
 import AddBookmarkModal from '../components/AddBookmarkModal';
-import FinishedModal from '../components/FinishedModal';
+import AddReviewModal from '../components/AddReviewModal';
 import StarRating from '../components/StarRating';
 import { getBookDetails } from '../services/api';
+import { getFicStats } from '../services/dbService';
+import { useAuth } from '../context/AuthContext';
+
+function formatNumber(num: number): string {
+  if (num >= 1000000) return (num / 1000000).toFixed(1).replace(/\.0$/, '') + 'm';
+  if (num >= 1000) return (num / 1000).toFixed(1).replace(/\.0$/, '') + 'k';
+  return num.toString();
+}
 
 interface FicProps {
   book: Book;
@@ -16,6 +24,7 @@ interface FicProps {
 export default function Fic({ book, onBack }: FicProps) {
   const [imgLoaded, setImgLoaded] = useState(false);
   const { activity, updateActivity } = useBookActivity(book);
+  const { profile } = useAuth();
   const { isRead, isLoved, isBookmarked, inReadlist, rating, startedOnDate } = activity;
   const [hoverReadlist, setHoverReadlist] = useState(false);
   const [isBookmarkModalOpen, setIsBookmarkModalOpen] = useState(false);
@@ -23,12 +32,36 @@ export default function Fic({ book, onBack }: FicProps) {
   const [isSynopsisExpanded, setIsSynopsisExpanded] = useState(false);
   const [synopsis, setSynopsis] = useState<string | null>(null);
   const [isLoadingSynopsis, setIsLoadingSynopsis] = useState(false);
+  const [ficStats, setFicStats] = useState<{
+    avg_rating?: number;
+    rating_count?: number;
+    readlist_count?: number;
+    loves_count?: number;
+  } | null>(null);
 
   useEffect(() => {
     setImgLoaded(false);
     setSynopsis(null);
     setIsSynopsisExpanded(false);
-    const fetchSynopsis = async () => {
+    
+    const loadStats = async () => {
+      const key = book.key ? book.key.replace('/works/', '') : null;
+      if (key) {
+        const stats = await getFicStats(key);
+        setFicStats(stats);
+      }
+    };
+    loadStats();
+    const loadSynopsis = async () => {
+      // Prioritize fanfic synopsis from the database
+      if (book.synopsis) {
+        // Strip out HTML tags since AO3 synopses often come with them and we render text
+        const cleanSynopsis = book.synopsis.replace(/<[^>]*>?/gm, '');
+        setSynopsis(cleanSynopsis);
+        return;
+      }
+
+      // Fallback for OpenLibrary books
       if (!book.key) return;
       setIsLoadingSynopsis(true);
       try {
@@ -45,7 +78,7 @@ export default function Fic({ book, onBack }: FicProps) {
       }
       setIsLoadingSynopsis(false);
     };
-    fetchSynopsis();
+    loadSynopsis();
   }, [book]);
 
   const coverUrl = book.cover_i
@@ -87,14 +120,14 @@ export default function Fic({ book, onBack }: FicProps) {
           </div>
           {/* Stats Row */}
           <div className="inter-regular fic-stats-block" style={{ display: 'flex', justifyContent: 'space-around', width: '100%', padding: '0 10px', color: '#000', fontSize: '18px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-              <StarSolid style={{ width: '22px', color: '#0f172a' }} /> 3.5 (1.2k)
+            <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }} title={`${ficStats?.rating_count || 0} total ratings`}>
+              <StarSolid style={{ width: '22px', color: '#0f172a' }} /> {ficStats?.avg_rating || 0} ({formatNumber(ficStats?.rating_count || 0)})
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-              <ClockSolid style={{ width: '22px', color: '#3f7dbe' }} /> 240
+            <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }} title={`${ficStats?.readlist_count || 0} users added to readlist`}>
+              <ClockSolid style={{ width: '22px', color: '#3f7dbe' }} /> {formatNumber(ficStats?.readlist_count || 0)}
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-              <HeartSolid style={{ width: '22px', color: '#990000' }} /> 635
+            <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }} title={`${ficStats?.loves_count || 0} total loves`}>
+              <HeartSolid style={{ width: '22px', color: '#990000' }} /> {formatNumber(ficStats?.loves_count || 0)}
             </div>
           </div>
         </div>
@@ -104,15 +137,81 @@ export default function Fic({ book, onBack }: FicProps) {
 
           {/* Top Section: Title & Details */}
           <div className="fic-title-block" style={{ paddingRight: '20px' }}>
-            <h2 className="rakkas-regular" style={{ color: 'var(--color-red)', fontSize: '40px', marginTop: 0, marginBottom: '20px', lineHeight: '1.1' }}>
+            <h2 className="rakkas-regular" style={{ color: 'var(--color-red)', fontSize: '40px', marginTop: 0, marginBottom: '10px', lineHeight: '1.1' }}>
               {book.title}
             </h2>
-            <div className="inter-regular fic-details-grid">
-              <div><strong>Author:</strong> {book.author_name?.join(', ') || 'Unknown'}</div>
-              <div><strong>Editions:</strong> {book.edition_count || 1}</div>
-              <div><strong>First Published:</strong> {book.first_publish_year || 'Unknown'}</div>
-              <div><strong>Link to book:</strong> samplelink.com</div>
-              <div><strong>Reading time:</strong> 8hrs, 22mins</div>
+            
+            <div className="inter-regular" style={{ fontSize: '18px', color: '#475569', marginBottom: '25px' }}>
+              by <span className="inter-bold" style={{ color: 'var(--color-dark)' }}>{book.author_name?.join(', ') || book.authors?.join(', ') || 'Unknown'}</span>
+            </div>
+
+            <div className="inter-regular fic-details-grid" style={{ gridTemplateColumns: '1fr', gap: '15px' }}>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '15px', padding: '15px', backgroundColor: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+                {book.rating && <div><strong>Rating:</strong> {book.rating}</div>}
+                {book.word_count != null && <div><strong>Words:</strong> {book.word_count.toLocaleString()}</div>}
+                {book.chapters_published != null && <div><strong>Chapters:</strong> {book.chapters_published}{book.chapters_total ? `/${book.chapters_total}` : ''}</div>}
+                {book.kudos != null && <div><strong>Kudos:</strong> {book.kudos.toLocaleString()}</div>}
+                {book.updated_date && <div><strong>Updated:</strong> {new Date(book.updated_date).toLocaleDateString()}</div>}
+                {book.published_date && <div><strong>Published:</strong> {new Date(book.published_date).toLocaleDateString()}</div>}
+              </div>
+
+              {(() => {
+                if (book.word_count == null) return null;
+                const wpm = profile?.words_per_minute || 250;
+                const totalMinutes = Math.ceil(book.word_count / wpm);
+                const hours = Math.floor(totalMinutes / 60);
+                const minutes = totalMinutes % 60;
+                let timeString = '';
+                if (hours > 0) timeString += `${hours} hr${hours > 1 ? 's' : ''} `;
+                if (minutes > 0 || hours === 0) timeString += `${minutes} min${minutes !== 1 ? 's' : ''}`;
+                return (
+                  <div className="fic-detail-row">
+                    <span className="fic-detail-label">Est. Reading Time:</span> {timeString} <span style={{fontSize: '14px', color: '#64748b'}}>(@ {wpm} wpm)</span>
+                  </div>
+                );
+              })()}
+
+              {book.url && (
+                <div className="fic-detail-row">
+                  <span className="fic-detail-label">Link:</span> <a href={book.url} target="_blank" rel="noreferrer" style={{ color: 'var(--color-red)', fontWeight: 500 }}>Read on AO3</a>
+                </div>
+              )}
+
+              {book.archive_warnings && book.archive_warnings.length > 0 && (
+                <div className="fic-detail-row">
+                  <span className="fic-detail-label">Warnings:</span>
+                  <div className="fic-tags-container">
+                    {book.archive_warnings.map((tag: string) => <span key={tag} className="fic-tag-pill warning">{tag}</span>)}
+                  </div>
+                </div>
+              )}
+
+              {book.fandoms && book.fandoms.length > 0 && (
+                <div className="fic-detail-row">
+                  <span className="fic-detail-label">Fandoms:</span>
+                  <div className="fic-tags-container">
+                    {book.fandoms.map((tag: string) => <span key={tag} className="fic-tag-pill fandom">{tag}</span>)}
+                  </div>
+                </div>
+              )}
+
+              {book.relationships && book.relationships.length > 0 && (
+                <div className="fic-detail-row">
+                  <span className="fic-detail-label">Relationships:</span>
+                  <div className="fic-tags-container">
+                    {book.relationships.map((tag: string) => <span key={tag} className="fic-tag-pill relationship">{tag}</span>)}
+                  </div>
+                </div>
+              )}
+
+              {book.additional_tags && book.additional_tags.length > 0 && (
+                <div className="fic-detail-row">
+                  <span className="fic-detail-label">Tags:</span>
+                  <div className="fic-tags-container">
+                    {book.additional_tags.map((tag: string) => <span key={tag} className="fic-tag-pill">{tag}</span>)}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
@@ -170,13 +269,23 @@ export default function Fic({ book, onBack }: FicProps) {
                 {isRead ? 'Finished' : (startedOnDate ? 'In Progress' : 'Unfinished')}
               </button>
               <button
-                onClick={() => updateActivity({ inReadlist: !inReadlist })}
+                onClick={() => {
+                  if (isRead || startedOnDate) return;
+                  updateActivity({ inReadlist: !inReadlist })
+                }}
                 onMouseEnter={() => setHoverReadlist(true)}
                 onMouseLeave={() => setHoverReadlist(false)}
                 className="inter-regular fic-action-btn"
+                title={(isRead || startedOnDate) ? "Cannot add to readlist (already started or finished)" : undefined}
+                style={{
+                  color: inReadlist ? '#3f7dbe' : ((isRead || startedOnDate) ? '#9ca3af' : undefined),
+                  cursor: (isRead || startedOnDate) ? 'not-allowed' : 'pointer',
+                  borderColor: (isRead || startedOnDate) ? '#e5e7eb' : undefined
+                }}
+                disabled={!!(isRead || startedOnDate)}
               >
-                {inReadlist ? <ClockSolid style={{ width: '28px', color: '#3f7dbe' }} /> : <ClockIcon style={{ width: '28px' }} />}
-                {inReadlist ? (hoverReadlist ? 'Remove' : 'Readlist') : 'Readlist'}
+                {inReadlist ? <ClockSolid style={{ width: '28px', color: '#3f7dbe' }} /> : <ClockIcon style={{ width: '28px', color: (isRead || startedOnDate) ? '#9ca3af' : undefined }} />}
+                {inReadlist ? (hoverReadlist && !(isRead || startedOnDate) ? 'Remove' : 'Readlist') : 'Readlist'}
               </button>
             </div>
           </div>
@@ -190,10 +299,10 @@ export default function Fic({ book, onBack }: FicProps) {
             const currentBookmarks = activity.bookmarks || [];
             updateActivity({
               isBookmarked: true,
-              bookmarks: [...currentBookmarks, { 
+              bookmarks: [...currentBookmarks, {
                 id: Date.now().toString(),
-                chapter, 
-                page, 
+                chapter,
+                page,
                 notes,
                 date: new Date().toISOString().split('T')[0] // 'YYYY-MM-DD'
               }]
@@ -204,7 +313,7 @@ export default function Fic({ book, onBack }: FicProps) {
       )}
 
       {isFinishedModalOpen && (
-        <FinishedModal
+        <AddReviewModal
           book={book}
           activity={activity}
           onClose={() => setIsFinishedModalOpen(false)}

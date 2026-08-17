@@ -2,16 +2,16 @@ import React, { useState } from 'react';
 import { XMarkIcon, EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
 import { useScrollLock } from '../hooks/useScrollLock';
+import { supabase } from '../services/supabase';
 
 interface SignUpModalProps {
     onClose: () => void;
     onSwitchToLogin: () => void;
-    onGuestLogin?: () => void;
 }
 
 
 
-export default function SignUpModal({ onClose, onSwitchToLogin, onGuestLogin }: SignUpModalProps) {
+export default function SignUpModal({ onClose, onSwitchToLogin }: SignUpModalProps) {
     useScrollLock();
 
     const [email, setEmail] = useState('');
@@ -19,7 +19,7 @@ export default function SignUpModal({ onClose, onSwitchToLogin, onGuestLogin }: 
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
         if (!email || !username || !password) {
@@ -38,19 +38,36 @@ export default function SignUpModal({ onClose, onSwitchToLogin, onGuestLogin }: 
             return;
         }
 
-        const users = JSON.parse(localStorage.getItem('users') || '[]');
+        try {
+            const { data, error } = await supabase.auth.signUp({
+                email,
+                password,
+                options: {
+                    data: {
+                        username
+                    }
+                }
+            });
 
-        const userExists = users.some((u: any) => u.email === email || u.username === username);
-        if (userExists) {
-            toast.error('User with this email or username already exists');
-            return;
+            if (error) throw error;
+
+            if (data.user) {
+                // Try to create profile
+                const { error: profileError } = await supabase.from('profiles').insert({
+                    id: data.user.id,
+                    username,
+                    words_per_minute: 250 // Default
+                });
+                if (profileError) {
+                    console.error('Failed to create profile:', profileError);
+                }
+            }
+
+            toast.success('Account created successfully! You can now log in.');
+            onSwitchToLogin();
+        } catch (error: any) {
+            toast.error(error.message || 'An error occurred during sign up');
         }
-
-        users.push({ email, username, password });
-        localStorage.setItem('users', JSON.stringify(users));
-
-        toast.success('Account created successfully! You can now log in.');
-        onSwitchToLogin();
     };
 
     return (
@@ -134,9 +151,6 @@ export default function SignUpModal({ onClose, onSwitchToLogin, onGuestLogin }: 
                     <button type="submit" className="auth-btn inter-bold">
                         Create Account
                     </button>
-                    <p className="inter-regular" style={{ textDecoration: 'underline', textAlign: 'center', margin: '0', cursor: 'pointer', color: 'var(--color-dark)' }} onClick={onGuestLogin}>
-                        Browse myArkive as guest
-                    </p>
                 </form>
             </div>
         </div>

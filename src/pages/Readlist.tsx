@@ -1,44 +1,32 @@
 import { useState, useEffect } from 'react';
 import BookCard, { Book } from '../components/BookCard';
 import Pagination from '../components/Pagination';
+import { useAuth } from '../context/AuthContext';
+import { getUserReadlist } from '../services/dbService';
 
 interface ReadlistProps {
   onBookSelect?: (book: Book) => void;
 }
 
 export default function Readlist({ onBookSelect }: ReadlistProps) {
+  const { user } = useAuth();
   const [books, setBooks] = useState<Book[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 24;
 
   useEffect(() => {
-    const loadReadlist = () => {
-      const stored = localStorage.getItem('userActivity');
-      if (stored) {
-        try {
-          const parsed = JSON.parse(stored);
-          const readlistBooks = Object.values(parsed)
-            .filter((activity: any) => activity.inReadlist && activity.bookData)
-            .map((activity: any) => activity.bookData);
-
-          // Reverse so newest additions appear first
-          setBooks(readlistBooks.reverse());
-        } catch (e) {
-          console.error('Error parsing userActivity', e);
-        }
-      }
+    if (!user) return;
+    const fetchList = async () => {
+      const list = await getUserReadlist(user.id);
+      setBooks(list);
     };
-
-    loadReadlist();
-    window.addEventListener('activity-updated', loadReadlist);
-    return () => window.removeEventListener('activity-updated', loadReadlist);
-  }, []);
+    fetchList();
+  }, [user]);
 
   const totalPages = Math.ceil(books.length / itemsPerPage);
   const currentBooks = books.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
   useEffect(() => {
-    // Reset to page 1 if the number of items drastically changes and we are out of bounds
     if (currentPage > totalPages && totalPages > 0) {
       setCurrentPage(totalPages);
     }
@@ -51,17 +39,15 @@ export default function Readlist({ onBookSelect }: ReadlistProps) {
           My Readlist
           {books.length > 0 && (
             <p className="inter-regular readlist-count-text">
-              You want to read {books.length} book{books.length === 1 ? '' : 's'}
+              You want to read {books.length} fic{books.length === 1 ? '' : 's'}
             </p>
           )}
         </h2>
       </div>
 
-
-
       {books.length === 0 ? (
         <div className="inter-bold empty-state-message">
-          No activity yet. Start interacting with books!
+          No activity yet. Start adding fics to your readlist!
         </div>
       ) : (
         <>

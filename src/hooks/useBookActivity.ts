@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Book } from '../components/BookCard';
-import { logActivity } from '../services/activityLogger';
+import { useAuth } from '../context/AuthContext';
+import { getUserFicActivity, toggleFicLove, setFicStatus, updateFicRating, addReadingLog, addReview, addBookmark, ensureFanficExists } from '../services/dbService';
 
 export interface BookmarkDetails {
   id: string;
@@ -26,100 +27,145 @@ export interface BookActivity {
 }
 
 export function useBookActivity(book: Book | null) {
-  const key = book?.key || book?.title || 'unknown';
+  const { user } = useAuth();
+  const key = book?.key ? book.key.replace('/works/', '') : 'unknown';
   
-  const [activity, setActivity] = useState<BookActivity>(() => {
-    if (!book) return defaultActivity(null);
-    const stored = localStorage.getItem('userActivity');
-    if (stored) {
-      try {
-        const parsed = JSON.parse(stored);
-        if (parsed[key]) {
-            // Ensure bookData is stored if it's missing or old
-            return { ...parsed[key], bookData: book };
-        }
-      } catch (e) {
-        console.error('Error parsing userActivity from localStorage', e);
-      }
-    }
-    return defaultActivity(book);
-  });
+  const [activity, setActivity] = useState<BookActivity>(defaultActivity(book));
 
-  const updateActivity = (updates: Partial<BookActivity>) => {
+  useEffect(() => {
+    if (!user || !book || key === 'unknown') return;
+
+    let mounted = true;
+
+    const fetchActivity = async () => {
+      try {
+        const { userFic, readingLogs, bookmarks, reviews } = await getUserFicActivity(user.id, key);
+        
+        if (!mounted) return;
+
+        const newActivity = defaultActivity(book);
+        if (userFic) {
+          newActivity.inReadlist = userFic.reading_status === 'readlist';
+          newActivity.isRead = userFic.reading_status === 'finished';
+          newActivity.isLoved = userFic.is_loved || false;
+          newActivity.startedOnDate = userFic.date_started || undefined;
+          newActivity.rating = userFic.user_rating || 0;
+        }
+        if (reviews && reviews.length > 0) {
+          newActivity.review = reviews[0].review_text || '';
+        }
+        if (readingLogs && readingLogs.length > 0) {
+          newActivity.readOnDate = readingLogs[0].date_finished || undefined;
+          newActivity.readBefore = readingLogs[0].is_reread || false;
+        }
+        if (bookmarks && bookmarks.length > 0) {
+          newActivity.isBookmarked = true;
+          newActivity.bookmarks = bookmarks.map(b => ({
+            id: b.id,
+            chapter: b.chapter_number?.toString() || '',
+            page: '',
+            notes: b.note || '',
+            date: ''
+          }));
+        }
+        setActivity(newActivity);
+      } catch (err) {
+        console.error('Failed to fetch activity', err);
+      }
+    };
+
+    fetchActivity();
+
+    return () => { mounted = false; };
+  }, [user, book, key]);
+
+  const updateActivity = async (updates: Partial<BookActivity>) => {
+    if (!user || key === 'unknown') return;
+
+    let finalIsRead = activity.isRead;
+
     setActivity(prev => {
       const next = { ...prev, ...updates, timestamp: Date.now() };
       
       // Auto-remove from readlist if the book is newly marked as read
       if ((updates.isRead === true && !prev.isRead) || (updates.readOnDate && !prev.readOnDate)) {
         next.inReadlist = false;
+        next.isRead = true;
       }
 
-      const miscActions: string[] = [];
-      if (updates.isLoved && !prev.isLoved) miscActions.push('Loved');
-      
-      if (
-        (updates.isBookmarked && !prev.isBookmarked) || 
-        (updates.bookmarks && updates.bookmarks.length > (prev.bookmarks?.length || 0))
-      ) {
-        miscActions.push('Bookmarked');
-      }
-      
-      if (updates.inReadlist && !prev.inReadlist) miscActions.push('Added to Readlist');
-      
-      let startedDate: string | undefined;
-      if (updates.startedOnDate && updates.startedOnDate !== prev.startedOnDate) {
-          startedDate = updates.startedOnDate;
-      }
+      finalIsRead = next.isRead;
 
-      let readDate: string | undefined;
-      if (updates.readOnDate && updates.readOnDate !== prev.readOnDate) {
-          readDate = updates.readOnDate;
-      }
-
-      let ratedVal: number | undefined;
-      if (updates.rating !== undefined && updates.rating !== prev.rating && updates.rating > 0) {
-        miscActions.push('Rated');
-        ratedVal = updates.rating;
-      }
-
-      let reviewText: string | undefined;
-      if (updates.review !== undefined && updates.review !== prev.review && updates.review.trim() !== '') {
-        miscActions.push('Reviewed');
-        reviewText = updates.review;
-      }
-
-      if (startedDate) {
-        logActivity(book, ['Started'], startedDate, undefined, ratedVal, readDate ? undefined : reviewText);
-      }
-
-      if (readDate) {
-        logActivity(book, ['Finished', ...miscActions], undefined, readDate, ratedVal, reviewText);
-      } else if (miscActions.length > 0) {
-        logActivity(book, miscActions, undefined, prev.readOnDate, ratedVal, reviewText);
-      }
-      
-      const stored = localStorage.getItem('userActivity');
-      const parsed = stored ? JSON.parse(stored) : {};
-      parsed[key] = next;
-      localStorage.setItem('userActivity', JSON.stringify(parsed));
-      
-      window.dispatchEvent(new CustomEvent('activity-updated', { detail: { key, activity: next } }));
-      
       return next;
     });
-  };
 
-  useEffect(() => {
-    const handleUpdate = (e: Event) => {
-      const customEvent = e as CustomEvent;
-      if (customEvent.detail && customEvent.detail.key === key) {
-        setActivity(customEvent.detail.activity);
+    try {
+      if (book) {
+        await ensureFanficExists(book);
       }
-    };
-    
-    window.addEventListener('activity-updated', handleUpdate);
-    return () => window.removeEventListener('activity-updated', handleUpdate);
-  }, [key]);
+
+      // Rule 1: Loves
+      if (updates.isLoved !== undefined && updates.isLoved !== activity.isLoved) {
+        await toggleFicLove(user.id, key, updates.isLoved);
+      }
+
+      // Rule 1: Bookmarks
+      if (updates.isBookmarked !== undefined && updates.bookmarks && updates.bookmarks.length > activity.bookmarks.length) {
+         const latestBookmark = updates.bookmarks[updates.bookmarks.length - 1];
+         if (latestBookmark) {
+            await addBookmark(user.id, key, parseInt(latestBookmark.chapter) || 1, latestBookmark.notes || '');
+         }
+      }
+
+      // Rule 2: Readlist
+      if (updates.inReadlist !== undefined && updates.inReadlist !== activity.inReadlist) {
+         if (updates.inReadlist) {
+            if (!activity.isRead && !activity.startedOnDate) {
+              await setFicStatus(user.id, key, 'readlist');
+            }
+         } else if (!finalIsRead) {
+            await setFicStatus(user.id, key, null);
+         }
+      }
+
+      const isFinishing = (updates.isRead === true && !activity.isRead) || (updates.readOnDate !== undefined);
+
+      // Explicit Start (If they set a start date but aren't finishing the book)
+      if (updates.startedOnDate !== undefined && updates.startedOnDate !== activity.startedOnDate && !isFinishing) {
+         await setFicStatus(user.id, key, 'reading', updates.startedOnDate);
+      }
+
+      // Rule 3: Finished / Ghost Reads
+      if (isFinishing) {
+         await setFicStatus(user.id, key, 'finished', updates.startedOnDate);
+      }
+      
+      const hasLogUpdates = updates.readBefore === true;
+      
+      let newLogId: string | null = null;
+      if (isFinishing || hasLogUpdates) {
+        const currentReadOnDate = updates.readOnDate !== undefined ? updates.readOnDate : activity.readOnDate;
+        const currentStartedDate = updates.startedOnDate !== undefined ? updates.startedOnDate : activity.startedOnDate;
+        const isReread = updates.readBefore !== undefined ? updates.readBefore : (activity.readBefore || activity.isRead);
+        
+        const logData = await addReadingLog(user.id, key, currentReadOnDate === null ? undefined : currentReadOnDate, currentStartedDate === null ? undefined : currentStartedDate, isReread);
+        newLogId = logData?.id || null;
+      }
+
+      // Review / Rating
+      if (updates.rating !== undefined || updates.review !== undefined) {
+         const currentRating = updates.rating !== undefined ? updates.rating : activity.rating;
+         const currentReview = updates.review !== undefined ? updates.review : activity.review;
+         
+         await updateFicRating(user.id, key, currentRating || null);
+         
+         if (currentReview || currentRating) {
+            await addReview(user.id, key, currentReview || '', currentRating || null, newLogId);
+         }
+      }
+    } catch (err) {
+      console.error('Failed to sync activity to Supabase', err);
+    }
+  };
 
   return { activity, updateActivity };
 }

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { MagnifyingGlassIcon, Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
+import { useAuth } from '../context/AuthContext';
 
 interface HeaderProps {
   isLoggedIn: boolean;
@@ -24,18 +25,8 @@ export default function Header({
 }: HeaderProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
-  const [currentUser, setCurrentUser] = React.useState<any>(null);
+  const { username } = useAuth();
 
-  React.useEffect(() => {
-    const storedUser = localStorage.getItem('currentUser');
-    if (storedUser) {
-      try {
-        setCurrentUser(JSON.parse(storedUser));
-      } catch { }
-    }
-  }, [isLoggedIn]);
-
-  const username = currentUser?.username || 'Guest';
   const avatarLetter = username.charAt(0).toUpperCase();
 
   const handleNavClick = (page: string) => {

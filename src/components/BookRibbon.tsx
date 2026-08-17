@@ -5,6 +5,7 @@ import { Book } from './BookCard';
 interface BookRibbonProps {
   book: Book;
   isRead: boolean;
+  isStarted?: boolean;
   inReadlist: boolean;
   onToggleRead: () => void;
   onToggleReadlist: () => void;
@@ -13,11 +14,14 @@ interface BookRibbonProps {
 
 export default function BookRibbon({
   isRead,
+  isStarted = false,
   inReadlist,
   onToggleRead,
   onToggleReadlist,
   onOptionsClick
 }: BookRibbonProps) {
+  const isReadlistDisabled = isRead || isStarted;
+
   return (
     <div className="book-ribbon" onClick={(e) => e.stopPropagation()}>
       <span className="action-icon dark-icon" title="More options" onClick={onOptionsClick} style={{ marginBottom: '-7px' }} >
@@ -33,9 +37,18 @@ export default function BookRibbon({
       </span>
       <span
         className="action-icon dark-icon readlist"
-        title="Readlist"
-        onClick={onToggleReadlist}
-        style={{ color: inReadlist ? '#3f7dbe' : undefined }}
+        title={isReadlistDisabled ? "Cannot add to readlist (already started or finished)" : "Toggle readlist"}
+        onClick={(e) => {
+          if (isReadlistDisabled) {
+            e.stopPropagation();
+            return;
+          }
+          onToggleReadlist();
+        }}
+        style={{ 
+          color: inReadlist ? '#3f7dbe' : (isReadlistDisabled ? '#9ca3af' : undefined),
+          cursor: isReadlistDisabled ? 'not-allowed' : 'pointer'
+        }}
       >
         {inReadlist ? <ClockSolid style={{ width: '20px', height: '20px' }} /> : <ClockIcon style={{ width: '20px', height: '20px' }} strokeWidth={2} />}
       </span>

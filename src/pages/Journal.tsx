@@ -1,19 +1,64 @@
 import React, { useState, useEffect } from 'react';
-import { getRecentActivity, RecentActivityItem } from '../services/activityLogger';
-import { BookActivity, useBookActivity } from '../hooks/useBookActivity';
-import { PencilIcon, Bars3Icon, ArrowPathIcon } from '@heroicons/react/24/outline';
+import { EllipsisHorizontalIcon, ArrowPathIcon, Bars3Icon } from '@heroicons/react/24/outline';
 import { HeartIcon as HeartSolid, StarIcon as StarSolid } from '@heroicons/react/24/solid';
-import FinishedModal from '../components/FinishedModal';
+import EditReviewModal from '../components/EditReviewModal';
+import AddReviewModal from '../components/AddReviewModal';
+import { useAuth } from '../context/AuthContext';
+import { getUserActivityFeed, updateReadingSession, deleteReadingSession } from '../services/dbService';
+import { useBookActivity } from '../hooks/useBookActivity';
 
 interface JournalProps {
   onBookSelect?: (book: any) => void;
 }
 
-function EditModalWrapper({ book, onClose }: { book: any, onClose: () => void }) {
+function EditModalWrapper({ itemData, onClose }: { itemData: any, onClose: () => void }) {
+  const { user } = useAuth();
+  
+  if (!user) return null;
+
+  const activity = {
+    isRead: !!itemData.finishedDate,
+    readOnDate: itemData.finishedDate ? new Date(itemData.finishedDate).toISOString().split('T')[0] : undefined,
+    startedOnDate: itemData.startedDate ? new Date(itemData.startedDate).toISOString().split('T')[0] : undefined,
+    readBefore: !!itemData.isReread,
+    review: itemData.review || '',
+    rating: itemData.rating || 0,
+    isLoved: false,
+    inReadlist: false,
+    bookmarks: [],
+    bookData: itemData.bookData,
+    timestamp: Date.now()
+  };
+
+  const handleSave = async (updates: any) => {
+    if (itemData.id.startsWith('log-')) {
+      const logId = itemData.id.replace('log-start-', '').replace('log-', '');
+      const ficKey = itemData.bookKey.replace('/works/', '');
+      await updateReadingSession(logId, user.id, ficKey, {
+        readOnDate: updates.readOnDate,
+        startedOnDate: updates.startedOnDate,
+        readBefore: updates.readBefore,
+        review: updates.review,
+        rating: updates.rating
+      });
+      window.location.reload();
+    }
+  };
+
+  return (
+    <EditReviewModal
+      book={itemData.bookData}
+      activity={activity as any}
+      onClose={onClose}
+      onSave={handleSave}
+    />
+  );
+}
+
+function LogModalWrapper({ book, onClose }: { book: any, onClose: () => void }) {
   const { activity, updateActivity } = useBookActivity(book);
   return (
-    <FinishedModal
-      isEditMode={true}
+    <AddReviewModal
       book={book}
       activity={activity}
       onClose={onClose}
@@ -39,14 +84,15 @@ function JournalDateBadge({ monthStr, yearStr }: { monthStr: string, yearStr: st
 interface JournalTableRowProps {
   data: any;
   onBookSelect?: (book: any) => void;
-  setEditingItem: (item: { book: any, activity: any }) => void;
+  setEditingItem: (item: any) => void;
+  setLoggingAgainBook: (book: any) => void;
+  onDeleteSession: (item: any) => void;
 }
 
-function JournalTableRow({ data, onBookSelect, setEditingItem }: JournalTableRowProps) {
-  const { item, bookState, showMonth, dayStr, monthStr, yearStr, statusText, rating, isLoved, hasReview, isReread } = data;
-  const coverUrl = bookState?.bookData?.cover_i
-    ? `https://covers.openlibrary.org/b/id/${bookState.bookData.cover_i}-S.jpg`
-    : '/tempCover.png';
+function JournalTableRow({ data, onBookSelect, setEditingItem, setLoggingAgainBook, onDeleteSession }: JournalTableRowProps) {
+  const { item, showMonth, dayStr, monthStr, yearStr, statusText, rating, isLoved, hasReview, isReread } = data;
+  const coverUrl = '/tempCover.png';
+  const [menuOpen, setMenuOpen] = useState(false);
 
   return (
     <tr style={{ borderBottom: '1px solid var(--color-gray)' }}>
@@ -62,15 +108,15 @@ function JournalTableRow({ data, onBookSelect, setEditingItem }: JournalTableRow
             <img src={coverUrl} alt={item.bookTitle} style={{ width: '100%', height: '100%', objectFit: 'cover', backgroundImage: "url('/tempCover.png')", backgroundSize: 'cover', backgroundPosition: 'center' }} onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = '/tempCover.png'; }} />
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', padding: '0 5px', alignItems: 'flex-start', justifyContent: 'center' }}>
-            {onBookSelect && bookState?.bookData ? (
-              <span className="rakkas-regular" style={{ cursor: 'pointer', color: 'var(--color-red)', fontSize: '25px', fontWeight: 'bold', letterSpacing: '1.5px', textDecoration: 'underline', lineHeight: 1.2 }} onClick={() => onBookSelect(bookState.bookData)}>
+            {onBookSelect && item.bookData ? (
+              <span className="rakkas-regular" style={{ cursor: 'pointer', color: 'var(--color-red)', fontSize: '25px', fontWeight: 'bold', letterSpacing: '1.5px', textDecoration: 'underline', lineHeight: 1.2 }} onClick={() => onBookSelect(item.bookData)}>
                 {item.bookTitle}
               </span>
             ) : (
               <span className="rakkas-regular" style={{ color: 'var(--color-red)', fontSize: '25px', fontWeight: 'bold', letterSpacing: '1.5px', lineHeight: 1.2 }}>{item.bookTitle}</span>
             )}
             <span className="inter-regular" style={{ color: 'var(--color-dark)', fontSize: '14px', marginTop: '4px' }}>
-              {bookState?.bookData?.author_name?.join(', ') || ''}
+              {item.bookData?.author_name?.join(', ') || ''}
             </span>
           </div>
         </div>
@@ -94,16 +140,32 @@ function JournalTableRow({ data, onBookSelect, setEditingItem }: JournalTableRow
       <td style={{ verticalAlign: 'middle', textAlign: 'center' }}>
         <Bars3Icon style={{ width: '24px', height: '24px', color: hasReview ? 'var(--color-dark)' : 'transparent', margin: '0 auto' }} />
       </td>
-      <td style={{ verticalAlign: 'middle', textAlign: 'center' }}>
-        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '10px', color: 'var(--color-dark)' }}>
-          <PencilIcon
-            style={{ width: '18px', height: '18px', cursor: 'pointer' }}
-            onClick={() => {
-              if (bookState?.bookData) {
-                setEditingItem({ book: bookState.bookData, activity: bookState });
-              }
-            }}
+      <td style={{ verticalAlign: 'middle', textAlign: 'center', position: 'relative' }}>
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', color: 'var(--color-dark)' }}>
+          <EllipsisHorizontalIcon
+            style={{ width: '24px', height: '24px', cursor: 'pointer' }}
+            onClick={(e) => { e.stopPropagation(); setMenuOpen(!menuOpen); }}
           />
+          {menuOpen && (
+            <>
+              <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 9 }} onClick={(e) => { e.stopPropagation(); setMenuOpen(false); }} />
+              <div 
+                className="inter-regular"
+                style={{ 
+                  position: 'absolute', right: '10px', top: '70%', zIndex: 10, 
+                  backgroundColor: 'white', border: '1px solid #ccc', borderRadius: '4px',
+                  boxShadow: '0 4px 6px rgba(0,0,0,0.1)', minWidth: '140px',
+                  display: 'flex', flexDirection: 'column', textAlign: 'left',
+                  fontSize: '14px'
+                }}
+                onClick={(e) => e.stopPropagation()}
+              >
+                 <div style={{ padding: '10px 15px', cursor: 'pointer', borderBottom: '1px solid #eee' }} onClick={() => { setMenuOpen(false); if (item.bookData) setEditingItem(item); }}>Edit review</div>
+                 <div style={{ padding: '10px 15px', cursor: 'pointer', borderBottom: '1px solid #eee' }} onClick={() => { setMenuOpen(false); if (item.bookData) setLoggingAgainBook(item.bookData); }}>Log again</div>
+                 <div style={{ padding: '10px 15px', cursor: 'pointer', color: 'red' }} onClick={() => { setMenuOpen(false); onDeleteSession(item); }}>Delete review</div>
+              </div>
+            </>
+          )}
         </div>
       </td>
     </tr>
@@ -111,52 +173,41 @@ function JournalTableRow({ data, onBookSelect, setEditingItem }: JournalTableRow
 }
 
 export default function Journal({ onBookSelect }: JournalProps) {
-  const [activities, setActivities] = useState<RecentActivityItem[]>([]);
-  const [userActivity, setUserActivity] = useState<Record<string, BookActivity>>({});
-  const [editingItem, setEditingItem] = useState<{ book: any, activity: any } | null>(null);
+  const { user } = useAuth();
+  const [activities, setActivities] = useState<any[]>([]);
+  const [editingItem, setEditingItem] = useState<any>(null);
+  const [loggingAgainBook, setLoggingAgainBook] = useState<any>(null);
+  
+  // Mobile dropdown state tracking which row's menu is open
+  const [mobileMenuOpenId, setMobileMenuOpenId] = useState<string | null>(null);
 
-  useEffect(() => {
-    const getFilteredActivity = () => {
-      return getRecentActivity()
-        .filter(a => a.startedDate || a.finishedDate)
-        .sort((a, b) => {
-          const aDate = new Date(a.finishedDate || a.startedDate!).getTime();
-          const bDate = new Date(b.finishedDate || b.startedDate!).getTime();
-          return bDate - aDate;
-        });
-    };
-
-    setActivities(getFilteredActivity());
-
-    const storedUserActivity = localStorage.getItem('userActivity');
-    if (storedUserActivity) {
-      try {
-        setUserActivity(JSON.parse(storedUserActivity));
-      } catch (e) {
-        console.error('Failed to parse user activity', e);
+  const handleDeleteSession = async (item: any) => {
+    if (window.confirm("Are you sure you want to delete this log?")) {
+      if (item.id.startsWith('log-')) {
+        const logId = item.id.replace('log-start-', '').replace('log-', '');
+        await deleteReadingSession(logId);
+        window.location.reload();
+      } else {
+         alert("Cannot delete this type of event directly.");
       }
     }
+  };
 
-    const handleActivityUpdated = () => {
-      const stored = localStorage.getItem('userActivity');
-      if (stored) {
-        try {
-          setUserActivity(JSON.parse(stored));
-        } catch { }
-      }
+  useEffect(() => {
+    if (!user) return;
+    const fetchActivity = async () => {
+      const feed = await getUserActivityFeed(user.id);
+      // Journal strictly shows reading progression (started/finished dates)
+      const journalFeed = feed.filter((item: any) => 
+        item.actions.includes('Started') || item.actions.includes('Finished')
+      );
+      setActivities(journalFeed);
     };
-
-    const handleRecent = () => setActivities(getFilteredActivity());
-    window.addEventListener('recent-activity-updated', handleRecent);
-    window.addEventListener('activity-updated', handleActivityUpdated);
-    return () => {
-      window.removeEventListener('recent-activity-updated', handleRecent);
-      window.removeEventListener('activity-updated', handleActivityUpdated);
-    };
-  }, []);
+    fetchActivity();
+  }, [user]);
 
   const parsedActivities = activities.map((item, index) => {
-    const itemDateStr = item.finishedDate || item.startedDate!;
+    const itemDateStr = item.actions.includes('Finished') ? item.finishedDate : item.startedDate!;
     const date = new Date(itemDateStr);
     date.setMinutes(date.getMinutes() + date.getTimezoneOffset());
     const monthStr = date.toLocaleString('en-US', { month: 'short' }).toUpperCase();
@@ -165,22 +216,21 @@ export default function Journal({ onBookSelect }: JournalProps) {
     const dayStr = date.getDate().toString().padStart(2, '0');
 
     const prevItem = index > 0 ? activities[index - 1] : null;
-    const prevDateStr = prevItem ? (prevItem.finishedDate || prevItem.startedDate!) : null;
+    const prevDateStr = prevItem ? (prevItem.actions.includes('Finished') ? prevItem.finishedDate : prevItem.startedDate!) : null;
     const prevDate = prevDateStr ? new Date(prevDateStr) : null;
     if (prevDate) prevDate.setMinutes(prevDate.getMinutes() + prevDate.getTimezoneOffset());
     const showMonth = !prevDate || prevDate.getMonth() !== date.getMonth() || prevDate.getFullYear() !== date.getFullYear();
 
-    const bookState = userActivity[item.bookKey];
     let statusText = 'Finished';
     if (item.actions.includes('Started')) statusText = 'Started';
     else if (item.actions.includes('Finished') || item.actions.includes('Read')) statusText = 'Finished';
 
-    const rating = item.rating || bookState?.rating || 0;
-    const isLoved = bookState?.isLoved || false;
-    const hasReview = !!bookState?.review;
+    const rating = item.rating || 0;
+    const isLoved = false; // Supabase bookmark/love separate logic if needed
+    const hasReview = !!item.review;
 
     const isReread = !!item.isReread;
-    return { item, date, showMonth, dayStr, monthStr, monthStrLong, yearStr, statusText, rating, isLoved, hasReview, bookState, isReread };
+    return { item, date, showMonth, dayStr, monthStr, monthStrLong, yearStr, statusText, rating, isLoved, hasReview, isReread };
   });
 
   return (
@@ -209,7 +259,7 @@ export default function Journal({ onBookSelect }: JournalProps) {
           <tbody>
             {parsedActivities.length === 0 ? (
               <tr>
-                <td colSpan={9} className="inter-bold" style={{ textAlign: 'center', padding: '50px', color: 'var(--color-dark)', fontSize: '16px' }}>No activity yet. Start interacting with books!</td>
+                <td colSpan={9} className="inter-bold" style={{ textAlign: 'center', padding: '50px', color: 'var(--color-dark)', fontSize: '16px' }}>No activity yet. Start logging your fics!</td>
               </tr>
             ) : (
               parsedActivities.map((data) => (
@@ -218,6 +268,8 @@ export default function Journal({ onBookSelect }: JournalProps) {
                   data={data}
                   onBookSelect={onBookSelect}
                   setEditingItem={setEditingItem}
+                  setLoggingAgainBook={setLoggingAgainBook}
+                  onDeleteSession={handleDeleteSession}
                 />
               ))
             )}
@@ -227,13 +279,11 @@ export default function Journal({ onBookSelect }: JournalProps) {
 
       <div className="mobile-journal">
         {parsedActivities.length === 0 ? (
-          <div className="inter-bold" style={{ textAlign: 'center', padding: '50px', color: 'var(--color-dark)', fontSize: '16px' }}>No activity yet. Start interacting with books!</div>
+          <div className="inter-bold" style={{ textAlign: 'center', padding: '50px', color: 'var(--color-dark)', fontSize: '16px' }}>No activity yet. Start logging your fics!</div>
         ) : (
           parsedActivities.map((data) => {
-            const { item, showMonth, dayStr, monthStrLong, yearStr, rating, isLoved, bookState, isReread } = data;
-            const coverUrl = bookState?.bookData?.cover_i
-              ? `https://covers.openlibrary.org/b/id/${bookState.bookData.cover_i}-S.jpg`
-              : '/tempCover.png';
+            const { item, showMonth, dayStr, monthStrLong, yearStr, rating, isLoved, isReread } = data;
+            const coverUrl = '/tempCover.png';
 
             return (
               <React.Fragment key={item.id}>
@@ -251,8 +301,8 @@ export default function Journal({ onBookSelect }: JournalProps) {
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', flexGrow: 1 }}>
                     <div style={{ display: 'flex', alignItems: 'baseline', gap: '6px', flexWrap: 'wrap' }}>
-                      {onBookSelect && bookState?.bookData ? (
-                        <span className="rakkas-regular" style={{ fontSize: '24px', color: 'var(--color-red)', cursor: 'pointer', textDecoration: 'underline' }} onClick={() => onBookSelect(bookState.bookData)}>
+                      {onBookSelect && item.bookData ? (
+                        <span className="rakkas-regular" style={{ fontSize: '24px', color: 'var(--color-red)', cursor: 'pointer', textDecoration: 'underline' }} onClick={() => onBookSelect(item.bookData)}>
                           {item.bookTitle}
                         </span>
                       ) : (
@@ -260,7 +310,7 @@ export default function Journal({ onBookSelect }: JournalProps) {
                       )}
                       <span className="inter-regular" style={{ fontSize: '12px', color: 'var(--color-dark)' }}>
                         {(() => {
-                          const authorText = bookState?.bookData?.author_name?.join(', ') || '';
+                          const authorText = item.bookData?.author_name?.join(', ') || '';
                           return authorText.length > 21 ? authorText.substring(0, 21) + '...' : authorText;
                         })()}
                       </span>
@@ -273,7 +323,32 @@ export default function Journal({ onBookSelect }: JournalProps) {
                       )}
                       {isLoved && <HeartSolid style={{ width: '14px', color: 'var(--color-red)' }} />}
                       {isReread && <ArrowPathIcon style={{ width: '14px', color: 'var(--color-dark)' }} title="Reread" />}
-                      <Bars3Icon style={{ width: '16px', color: '#6b7280', cursor: 'pointer' }} onClick={() => { if (bookState?.bookData) setEditingItem({ book: bookState.bookData, activity: bookState }); }} />
+                      <div style={{ position: 'relative' }}>
+                        <EllipsisHorizontalIcon 
+                          style={{ width: '24px', color: '#6b7280', cursor: 'pointer' }} 
+                          onClick={(e) => { e.stopPropagation(); setMobileMenuOpenId(mobileMenuOpenId === item.id ? null : item.id); }} 
+                        />
+                        {mobileMenuOpenId === item.id && (
+                          <>
+                            <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 9 }} onClick={(e) => { e.stopPropagation(); setMobileMenuOpenId(null); }} />
+                            <div 
+                              className="inter-regular"
+                              style={{ 
+                                position: 'absolute', right: '0', top: '100%', zIndex: 10, 
+                                backgroundColor: 'white', border: '1px solid #ccc', borderRadius: '4px',
+                                boxShadow: '0 4px 6px rgba(0,0,0,0.1)', minWidth: '140px',
+                                display: 'flex', flexDirection: 'column', textAlign: 'left',
+                                fontSize: '14px'
+                              }}
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                               <div style={{ padding: '10px 15px', cursor: 'pointer', borderBottom: '1px solid #eee' }} onClick={() => { setMobileMenuOpenId(null); if (item.bookData) setEditingItem(item); }}>Edit review</div>
+                               <div style={{ padding: '10px 15px', cursor: 'pointer', borderBottom: '1px solid #eee' }} onClick={() => { setMobileMenuOpenId(null); if (item.bookData) setLoggingAgainBook(item.bookData); }}>Log again</div>
+                               <div style={{ padding: '10px 15px', cursor: 'pointer', color: 'red' }} onClick={() => { setMobileMenuOpenId(null); handleDeleteSession(item); }}>Delete review</div>
+                            </div>
+                          </>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -285,8 +360,15 @@ export default function Journal({ onBookSelect }: JournalProps) {
 
       {editingItem && (
         <EditModalWrapper
-          book={editingItem.book}
+          itemData={editingItem}
           onClose={() => setEditingItem(null)}
+        />
+      )}
+
+      {loggingAgainBook && (
+        <LogModalWrapper
+          book={loggingAgainBook}
+          onClose={() => setLoggingAgainBook(null)}
         />
       )}
     </div>

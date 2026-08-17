@@ -1,13 +1,14 @@
 import { useState, useEffect } from 'react';
-import { getRecentActivity, RecentActivityItem } from '../services/activityLogger';
 import { HeartIcon as HeartSolid, StarIcon as StarSolid } from '@heroicons/react/24/solid';
 import { getRelativeTimeStrict } from '../utils/timeFormat';
+import { useAuth } from '../context/AuthContext';
+import { getUserActivityFeed } from '../services/dbService';
 
 function formatActions(actions: string[]) {
     const verbMap: Record<string, string> = {
         'Started': 'started',
         'Finished': 'finished',
-        'Loved': 'liked',
+        'Loved': 'loved',
         'Rated': 'rated',
         'Reviewed': 'reviewed',
         'Bookmarked': 'bookmarked',
@@ -37,8 +38,7 @@ interface ActivityFeedProps {
 }
 
 interface ActivityFeedItemProps {
-    item: RecentActivityItem;
-    userActivity: any;
+    item: any;
     onBookSelect?: (book: any) => void;
     verbsText: string;
     suffix: string;
@@ -46,13 +46,10 @@ interface ActivityFeedItemProps {
     relTime: string;
 }
 
-function ActivityFeedItem({ item, userActivity, onBookSelect, verbsText, suffix, dateStr, relTime }: ActivityFeedItemProps) {
+function ActivityFeedItem({ item, onBookSelect, verbsText, suffix, dateStr, relTime }: ActivityFeedItemProps) {
     const hasReview = !!item.review;
-    const bookState = userActivity[item.bookKey];
-    const coverUrl = bookState?.bookData?.cover_i
-        ? `https://covers.openlibrary.org/b/id/${bookState.bookData.cover_i}-M.jpg`
-        : '/tempCover.png';
-    const author = bookState?.bookData?.author_name?.[0] || '';
+    const coverUrl = '/tempCover.png';
+    const author = item.bookData?.author_name?.[0] || '';
 
     return (
         <div style={{ borderBottom: '1px solid var(--color-gray)', padding: '15px 0' }}>
@@ -62,10 +59,10 @@ function ActivityFeedItem({ item, userActivity, onBookSelect, verbsText, suffix,
                     {!hasReview ? (
                         <>
                             {' '}
-                            {onBookSelect && bookState?.bookData ? (
+                            {onBookSelect && item.bookData ? (
                                 <strong
                                     className="rakkas-regular" style={{ fontSize: '17px', color: 'var(--color-red)', cursor: 'pointer', textDecoration: 'underline', letterSpacing: '1.5px' }}
-                                    onClick={() => onBookSelect(bookState.bookData)}
+                                    onClick={() => onBookSelect(item.bookData)}
                                 >
                                     {item.bookTitle}
                                 </strong>
@@ -81,7 +78,9 @@ function ActivityFeedItem({ item, userActivity, onBookSelect, verbsText, suffix,
                             ) : null}
                             {dateStr}
                         </>
-                    ) : null}
+                    ) : (
+                        <>{dateStr}</>
+                    )}
                 </div>
                 <div className="inter-regular" style={{ color: 'var(--color-gray)', fontSize: '14px', minWidth: '40px', textAlign: 'right', flexShrink: 0, paddingLeft: '10px' }}>
                     {relTime}
@@ -91,8 +90,8 @@ function ActivityFeedItem({ item, userActivity, onBookSelect, verbsText, suffix,
             {hasReview && (
                 <div style={{ marginTop: '10px' }}>
                     <div style={{ display: 'flex', alignItems: 'baseline', gap: '10px', flexWrap: 'wrap' }}>
-                        {onBookSelect && bookState?.bookData ? (
-                            <h4 className="rakkas-regular activity-review-title" style={{ color: 'var(--color-red)', margin: 0, lineHeight: 1, cursor: 'pointer', textDecoration: 'underline' }} onClick={() => onBookSelect(bookState.bookData)}>
+                        {onBookSelect && item.bookData ? (
+                            <h4 className="rakkas-regular activity-review-title" style={{ color: 'var(--color-red)', margin: 0, lineHeight: 1, cursor: 'pointer', textDecoration: 'underline' }} onClick={() => onBookSelect(item.bookData)}>
                                 {item.bookTitle}
                             </h4>
                         ) : (
@@ -130,23 +129,17 @@ function ActivityFeedItem({ item, userActivity, onBookSelect, verbsText, suffix,
 }
 
 export default function ActivityFeed({ onBookSelect }: ActivityFeedProps) {
-    const [activities, setActivities] = useState<RecentActivityItem[]>([]);
-    const [userActivity, setUserActivity] = useState<any>({});
+    const { user } = useAuth();
+    const [activities, setActivities] = useState<any[]>([]);
 
     useEffect(() => {
-        setActivities(getRecentActivity());
-
-        const stored = localStorage.getItem('userActivity');
-        if (stored) {
-            try {
-                setUserActivity(JSON.parse(stored));
-            } catch { }
-        }
-
-        const handleRecent = () => setActivities(getRecentActivity());
-        window.addEventListener('recent-activity-updated', handleRecent);
-        return () => window.removeEventListener('recent-activity-updated', handleRecent);
-    }, []);
+        if (!user) return;
+        const fetchActivity = async () => {
+            const feed = await getUserActivityFeed(user.id);
+            setActivities(feed);
+        };
+        fetchActivity();
+    }, [user]);
 
     return (
         <div className="page-container">
@@ -181,7 +174,6 @@ export default function ActivityFeed({ onBookSelect }: ActivityFeedProps) {
                             <ActivityFeedItem
                                 key={item.id}
                                 item={item}
-                                userActivity={userActivity}
                                 onBookSelect={onBookSelect}
                                 verbsText={verbsText}
                                 suffix={suffix}

@@ -2,24 +2,23 @@ import React, { useState } from 'react';
 import { XMarkIcon, EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
 import { useScrollLock } from '../hooks/useScrollLock';
+import { supabase } from '../services/supabase';
 
 interface LogInModalProps {
     onClose: () => void;
     onSwitchToRegister: () => void;
     onLoginSuccess?: () => void;
-    onGuestLogin?: () => void;
 }
 
-
-
-export default function LogInModal({ onClose, onSwitchToRegister, onLoginSuccess, onGuestLogin }: LogInModalProps) {
+export default function LogInModal({ onClose, onSwitchToRegister, onLoginSuccess }: LogInModalProps) {
     useScrollLock();
 
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
+    const [keepSignedIn, setKeepSignedIn] = useState(true);
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         let isValid = true;
 
@@ -27,7 +26,7 @@ export default function LogInModal({ onClose, onSwitchToRegister, onLoginSuccess
             toast.error('All fields are required');
             isValid = false;
         } else if (!email) {
-            toast.error('Email or username is required');
+            toast.error('Email is required');
             isValid = false;
         } else if (!password) {
             toast.error('Password is required');
@@ -35,20 +34,25 @@ export default function LogInModal({ onClose, onSwitchToRegister, onLoginSuccess
         }
 
         if (isValid) {
-            const users = JSON.parse(localStorage.getItem('users') || '[]');
+            try {
+                const { error } = await supabase.auth.signInWithPassword({
+                    email,
+                    password
+                });
 
-            // Allow login with either email or username
-            const user = users.find((u: any) =>
-                (u.email === email || u.username === email) && u.password === password
-            );
+                if (error) throw error;
 
-            if (user) {
-                localStorage.setItem('currentUser', JSON.stringify(user));
+                if (!keepSignedIn) {
+                    sessionStorage.setItem('tempSession', 'true');
+                } else {
+                    sessionStorage.removeItem('tempSession');
+                }
+
                 toast.success('Logged in successfully!');
                 onClose();
                 if (onLoginSuccess) onLoginSuccess();
-            } else {
-                toast.error('Invalid email/username or password');
+            } catch (error: any) {
+                toast.error(error.message || 'Invalid email or password');
             }
         }
     };
@@ -80,7 +84,7 @@ export default function LogInModal({ onClose, onSwitchToRegister, onLoginSuccess
                 <form style={{ display: 'flex', flexDirection: 'column', gap: '20px' }} onSubmit={handleSubmit}>
 
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                        <label className="inter-regular" style={{ fontSize: '15px' }}>Email address or Username</label>
+                        <label className="inter-regular" style={{ fontSize: '15px' }}>Email address</label>
                         <input
                             type="text"
                             value={email}
@@ -122,12 +126,22 @@ export default function LogInModal({ onClose, onSwitchToRegister, onLoginSuccess
                         </div>
                     </div>
 
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', margin: '4px 0' }}>
+                        <input
+                            type="checkbox"
+                            id="keepSignedIn"
+                            checked={keepSignedIn}
+                            onChange={(e) => setKeepSignedIn(e.target.checked)}
+                            style={{ width: '16px', height: '16px', cursor: 'pointer', accentColor: 'var(--color-red)' }}
+                        />
+                        <label htmlFor="keepSignedIn" className="inter-regular" style={{ fontSize: '14px', cursor: 'pointer', color: 'var(--color-dark)' }}>
+                            Keep me signed in
+                        </label>
+                    </div>
+
                     <button type="submit" className="auth-btn inter-bold">
                         Login
                     </button>
-                    <p className="inter-regular" style={{ textDecoration: 'underline', textAlign: 'center', margin: '0', cursor: 'pointer', color: 'var(--color-dark)' }} onClick={onGuestLogin}>
-                        Browse myArkive as guest
-                    </p>
                 </form>
             </div>
         </div>

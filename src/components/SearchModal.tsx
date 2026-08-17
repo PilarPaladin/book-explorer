@@ -48,7 +48,7 @@ export default function SearchModal({ onClose, onSelectBook, intent = 'search' }
       setIsSearching(true);
       try {
         const data = await searchBooks(query);
-        setResults(data || []);
+        setResults(data.docs || []);
       } catch {
         setResults([]);
       }

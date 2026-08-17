@@ -1,26 +1,44 @@
 import { Book } from '../components/BookCard';
+import { supabase } from './supabase';
+import { mapFanficToBook } from './dbService';
 
 export const searchBooks = async (query: string, page: number = 1, limit: number = 24): Promise<{docs: Book[], numFound: number}> => {
-  const url = `https://openlibrary.org/search.json?q=${encodeURIComponent(query)}&page=${page}&limit=${limit}`;
-  const response = await fetch(url);
-  if (!response.ok) {
-    throw new Error('Failed to fetch books');
+  const { data, error, count } = await supabase
+    .from('fanfics')
+    .select('*', { count: 'exact' })
+    .ilike('title', `%${query}%`)
+    .range((page - 1) * limit, page * limit - 1);
+
+  if (error) {
+    throw new Error('Failed to fetch books: ' + error.message);
   }
-  const data = await response.json();
-  return { docs: data.docs, numFound: data.numFound };
+
+  return { docs: (data || []).map(mapFanficToBook), numFound: count || 0 };
 };
 
 export const getPopularBooks = async (): Promise<Book[]> => {
-  //predefined search to simulate "popular" books for the initial view
-  const res = await searchBooks('computer', 1, 24);
-  return res.docs;
+  const { data, error } = await supabase
+    .from('fanfics')
+    .select('*')
+    .order('kudos', { ascending: false, nullsFirst: false })
+    .limit(24);
+  
+  if (error) {
+    return [];
+  }
+  return (data || []).map(mapFanficToBook);
 };
 
 export const getBookDetails = async (key: string): Promise<any> => {
-  const url = `https://openlibrary.org${key}.json`;
-  const response = await fetch(url);
-  if (!response.ok) {
-    throw new Error('Failed to fetch book details');
+  const id = key.replace('/works/', '');
+  const { data, error } = await supabase
+    .from('fanfics')
+    .select('*')
+    .eq('id', id)
+    .single();
+
+  if (error) {
+    throw new Error('Failed to fetch book details: ' + error.message);
   }
-  return response.json();
+  return data;
 };

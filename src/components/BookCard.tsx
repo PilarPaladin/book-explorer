@@ -42,6 +42,7 @@ export default function BookCard({ book, onClick, onOpenFic, badgeCount }: BookC
         <BookRibbon
           book={book}
           isRead={!!isRead}
+          isStarted={!!activity.startedOnDate}
           inReadlist={!!inReadlist}
           onToggleRead={() => updateActivity({ isRead: !isRead })}
           onToggleReadlist={() => updateActivity({ inReadlist: !inReadlist })}

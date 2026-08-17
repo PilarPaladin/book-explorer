@@ -5,30 +5,29 @@ import { Book } from './BookCard';
 import { BookActivity } from '../hooks/useBookActivity';
 import StarRating from './StarRating';
 
-interface FinishedModalProps {
+interface AddReviewModalProps {
   book: Book;
   activity?: BookActivity;
   onClose: () => void;
   onSave?: (updates: any) => void;
-  isEditMode?: boolean;
 }
 
-export default function FinishedModal({ book, activity = {} as BookActivity, onClose, onSave, isEditMode }: FinishedModalProps) {
-  const [readOnDate, setReadOnDate] = useState(activity.readOnDate || new Date().toISOString().split('T')[0]);
-  const [readOnChecked, setReadOnChecked] = useState(!!activity.readOnDate || activity.isRead);
-  const [startedOnDate, setStartedOnDate] = useState(activity.startedOnDate || new Date().toISOString().split('T')[0]);
-  const [startedOnChecked, setStartedOnChecked] = useState(!!activity.startedOnDate);
-  const [readBefore, setReadBefore] = useState(activity.readBefore || false);
-  const [review, setReview] = useState(activity.review || '');
-  const [rating, setRating] = useState(activity.rating || 0);
+export default function AddReviewModal({ book, activity = {} as BookActivity, onClose, onSave }: AddReviewModalProps) {
+  const [readOnDate, setReadOnDate] = useState(new Date().toISOString().split('T')[0]);
+  const [readOnChecked, setReadOnChecked] = useState(true);
+  const [startedOnDate, setStartedOnDate] = useState(new Date().toISOString().split('T')[0]);
+  const [startedOnChecked, setStartedOnChecked] = useState(false);
+  const [readBefore, setReadBefore] = useState(activity.isRead || false);
+  const [review, setReview] = useState('');
+  const [rating, setRating] = useState(0);
   const [isLoved, setIsLoved] = useState(activity.isLoved || false);
 
   const handleSave = () => {
     if (onSave) {
       onSave({
         isRead: readOnChecked || readBefore,
-        readOnDate: readOnChecked ? readOnDate : undefined,
-        startedOnDate: startedOnChecked ? startedOnDate : undefined,
+        readOnDate: readOnChecked ? readOnDate : null,
+        startedOnDate: startedOnChecked ? startedOnDate : null,
         readBefore,
         review,
         rating,
@@ -45,7 +44,7 @@ export default function FinishedModal({ book, activity = {} as BookActivity, onC
         {/* Header */}
         <div className="finished-modal-header">
           <h2 className="rakkas-regular finished-modal-title">
-            {isEditMode ? 'Edit activity...' : 'I finished reading...'}
+            I finished reading...
           </h2>
           <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
             <XMarkIcon style={{ width: '24px', color: 'var(--color-dark)' }} />
@@ -80,14 +79,14 @@ export default function FinishedModal({ book, activity = {} as BookActivity, onC
                   <input type="checkbox" checked={startedOnChecked} onChange={(e) => setStartedOnChecked(e.target.checked)} className="finished-modal-checkbox" />
                   Started On
                 </label>
-                <input type="date" value={startedOnDate} onChange={e => setStartedOnDate(e.target.value)} className="inter-regular finished-modal-date" />
+                <input type="date" value={startedOnDate} onChange={e => { setStartedOnDate(e.target.value); setStartedOnChecked(true); }} className="inter-regular finished-modal-date" />
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <label className="inter-regular finished-modal-label">
                   <input type="checkbox" checked={readOnChecked} onChange={(e) => setReadOnChecked(e.target.checked)} className="finished-modal-checkbox" />
                   Finished on
                 </label>
-                <input type="date" value={readOnDate} onChange={e => setReadOnDate(e.target.value)} className="inter-regular finished-modal-date" />
+                <input type="date" value={readOnDate} onChange={e => { setReadOnDate(e.target.value); setReadOnChecked(true); }} className="inter-regular finished-modal-date" />
               </div>
             </div>
 
