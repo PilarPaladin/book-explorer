@@ -1,0 +1,11 @@
+# myArkived
+
+myArkived is a portfolio project designed for tracking, logging, and reviewing fan-fiction. It provides a dedicated space for the community to keep an organized record of the stories they read.
+
+## Developer
+Built by **[PilarPaladin]**.
+
+## Core Functionality
+- Track and log fan-fiction progress.
+- Write reviews and rate favorite works.
+- Secure user authentication powered by Supabase.

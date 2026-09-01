@@ -8,9 +8,10 @@ import { supabase } from '../services/supabase';
 interface SidebarProps {
   isLoading: boolean;
   setCurrentPage?: (page: string) => void;
+  onBookSelect?: (book: any) => void;
 }
 
-export default function Sidebar({ isLoading, setCurrentPage }: SidebarProps) {
+export default function Sidebar({ isLoading, setCurrentPage, onBookSelect }: SidebarProps) {
   const { user, username } = useAuth();
   const [recentActivity, setRecentActivity] = useState<any[]>([]);
   const [stats, setStats] = useState({ reads: 0, bookmarks: 0, readlist: 0 });
