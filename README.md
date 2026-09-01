@@ -13,7 +13,7 @@ My ultimate vision for this app is to immediately move away from the Open Librar
 
 I chose to isolate this assignment on its own branch so I could learn and experiment with branch-based hosting on Vercel. This also leaves me freedom with my main branch, as I plan to refactor the entire codebase to TypeScript for better maintainability and scaling. Im deciding that javascript suffices for the assignment.
 
-If you're curious, you may check [myarkived.app](https://myarkived.app)for what I meant lol. It's still a work in progress though.
+If you're curious, you may check [myarkived.app](https://myarkived.app) for what I meant lol. It's still a work in progress though.
 
 ---
 
