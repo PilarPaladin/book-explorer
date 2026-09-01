@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import { EyeIcon, HeartIcon, BookmarkIcon, ClockIcon, ArrowLeftIcon } from '@heroicons/react/24/outline';
 import { EyeIcon as EyeSolid, HeartIcon as HeartSolid, BookmarkIcon as BookmarkSolid, ClockIcon as ClockSolid, StarIcon as StarSolid } from '@heroicons/react/24/solid';
 import { Book } from '../components/BookCard';
@@ -9,6 +10,7 @@ import StarRating from '../components/StarRating';
 import { getBookDetails } from '../services/api';
 import { getFicStats } from '../services/dbService';
 import { useAuth } from '../context/AuthContext';
+import SEO from '../components/SEO';
 
 function formatNumber(num: number): string {
   if (num >= 1000000) return (num / 1000000).toFixed(1).replace(/\.0$/, '') + 'm';
@@ -16,12 +18,46 @@ function formatNumber(num: number): string {
   return num.toString();
 }
 
-interface FicProps {
-  book: Book;
-  onBack: () => void;
+export default function Fic() {
+  const { id } = useParams<{ id: string }>();
+  const location = useLocation();
+  const navigate = useNavigate();
+  
+  const [book, setBook] = useState<Book | null>(location.state?.book || null);
+  const [isLoading, setIsLoading] = useState(!book);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!book && id) {
+      const fetchBook = async () => {
+        setIsLoading(true);
+        try {
+          // Reconstruct the full key since our router just uses the ID part
+          const fullKey = `/works/${id}`;
+          const fetchedBook = await getBookDetails(fullKey);
+          setBook(fetchedBook);
+        } catch (err) {
+          console.error("Failed to fetch book details", err);
+          setError("Failed to load book details.");
+        }
+        setIsLoading(false);
+      };
+      fetchBook();
+    }
+  }, [id, book]);
+
+  if (isLoading) {
+    return <div style={{ display: 'flex', justifyContent: 'center', padding: '50px' }}>Loading...</div>;
+  }
+
+  if (error || !book) {
+    return <div style={{ display: 'flex', justifyContent: 'center', padding: '50px', color: 'var(--color-dark)' }}>{error || "Book not found."}</div>;
+  }
+
+  return <FicContent book={book} onBack={() => navigate(-1)} />;
 }
 
-export default function Fic({ book, onBack }: FicProps) {
+function FicContent({ book, onBack }: { book: Book, onBack: () => void }) {
   const [imgLoaded, setImgLoaded] = useState(false);
   const { activity, updateActivity } = useBookActivity(book);
   const { profile } = useAuth();
@@ -87,6 +123,10 @@ export default function Fic({ book, onBack }: FicProps) {
 
   return (
     <div style={{ width: '100%', padding: '0px 0px 40px 0px' }}>
+      <SEO 
+        title={book.title || 'Fanfic'} 
+        description={synopsis ? synopsis.slice(0, 150) : `Read ${book.title} on myArkived.`} 
+      />
 
       <button
         onClick={onBack}

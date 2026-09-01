@@ -3,6 +3,7 @@ import LoadingGrid from '../components/LoadingGrid';
 import BookCard, { Book } from '../components/BookCard';
 import Pagination from '../components/Pagination';
 import { searchBooks } from '../services/api';
+import SEO from '../components/SEO';
 
 interface ResultsProps {
     searchQuery: string;
@@ -44,6 +45,7 @@ export default function Results({ searchQuery, onBookSelect }: ResultsProps) {
 
     return (
         <div className="page-container">
+            <SEO title={`Search: ${searchQuery}`} description={`Search results for ${searchQuery} on myArkived.`} />
             <div className="page-header-container">
                 <h2 className="rakkas-regular page-title">
                     Results for: {searchQuery}

@@ -45,7 +45,7 @@ export default function Sidebar({ isLoading, setCurrentPage, onBookSelect }: Sid
     <div className="right-column">
       <div className="profile-section">
         <div className="avatar inter-bold">{avatarLetter}</div>
-        <h3 className="profile-name inter-bold" style={{ cursor: setCurrentPage ? 'pointer' : 'default' }} onClick={() => setCurrentPage?.('profile')}>{username}</h3>
+        <h3 className="profile-name inter-bold" style={{ cursor: setCurrentPage ? 'pointer' : 'default' }} onClick={() => setCurrentPage?.(`profile/${username}`)}>{username}</h3>
       </div>
 
       <div className="stats-row">

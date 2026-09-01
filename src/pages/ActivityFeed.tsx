@@ -3,6 +3,7 @@ import { HeartIcon as HeartSolid, StarIcon as StarSolid } from '@heroicons/react
 import { getRelativeTimeStrict } from '../utils/timeFormat';
 import { useAuth } from '../context/AuthContext';
 import { getUserActivityFeed } from '../services/dbService';
+import SEO from '../components/SEO';
 
 function formatActions(actions: string[]) {
     const verbMap: Record<string, string> = {
@@ -143,6 +144,7 @@ export default function ActivityFeed({ onBookSelect }: ActivityFeedProps) {
 
     return (
         <div className="page-container">
+            <SEO title="Activity Feed" description="See what others are reading and reviewing on myArkived." />
             <div className="page-header-container">
                 <h2 className="rakkas-regular page-title">
                     My Activity

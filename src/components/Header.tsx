@@ -46,7 +46,7 @@ export default function Header({
 
         {isLoggedIn ? (
           <div className="mobile-actions" style={{ flexGrow: isMobileSearchOpen ? 1 : 0, marginLeft: isMobileSearchOpen ? '10px' : '0' }}>
-            <button className="mobile-action-btn" onClick={() => handleNavClick('profile')} style={{ flexShrink: 0, padding: '0 5px', marginRight: '5px' }}>
+            <button className="mobile-action-btn" onClick={() => handleNavClick(`profile/${username}`)} style={{ flexShrink: 0, padding: '0 5px', marginRight: '5px' }}>
               <div className="avatar inter-bold" style={{ width: '28px', height: '28px', fontSize: '14px', border: '1px solid var(--color-white)', color: 'var(--color-dark)', backgroundColor: '#e5e7eb' }}>
                 {avatarLetter}
               </div>
@@ -131,7 +131,7 @@ export default function Header({
             }}>
               + LOG
             </button>
-            <a href="#" className="nav-link desktop-only" onClick={(e) => { e.preventDefault(); handleNavClick('profile'); }} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <a href="#" className="nav-link desktop-only" onClick={(e) => { e.preventDefault(); handleNavClick(`profile/${username}`); }} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <div className="avatar inter-bold" style={{ width: '24px', height: '24px', fontSize: '12px' }}>{avatarLetter}</div>
               {username}
             </a>

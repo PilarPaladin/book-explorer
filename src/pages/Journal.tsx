@@ -4,6 +4,7 @@ import { HeartIcon as HeartSolid, StarIcon as StarSolid } from '@heroicons/react
 import EditReviewModal from '../components/EditReviewModal';
 import AddReviewModal from '../components/AddReviewModal';
 import { useAuth } from '../context/AuthContext';
+import SEO from '../components/SEO';
 import { getUserActivityFeed, updateReadingSession, deleteReadingSession } from '../services/dbService';
 import { useBookActivity } from '../hooks/useBookActivity';
 
@@ -278,6 +279,9 @@ export default function Journal({ onBookSelect }: JournalProps) {
       </div>
 
       <div className="mobile-journal">
+        <div style={{ paddingBottom: '40px' }}>
+            <SEO title="Reading Journal" description="Your personal fanfiction reading journal and reviews." />
+        </div>
         {parsedActivities.length === 0 ? (
           <div className="inter-bold" style={{ textAlign: 'center', padding: '50px', color: 'var(--color-dark)', fontSize: '16px' }}>No activity yet. Start logging your fics!</div>
         ) : (

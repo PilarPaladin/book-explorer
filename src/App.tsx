@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import { getPopularBooks } from './services/api';
 import toast, { Toaster } from 'react-hot-toast';
 import Bookmarks from './pages/Bookmarks';
@@ -14,6 +15,9 @@ import SearchModal from './components/SearchModal';
 import Header from './components/Header';
 import Fic from './pages/Fic';
 import Results from './pages/Results';
+import Popular from './pages/Popular';
+import RecentlyAdded from './pages/RecentlyAdded';
+import AllTimeBest from './pages/AllTimeBest';
 import AddReviewModal from './components/AddReviewModal';
 import { useBookActivity } from './hooks/useBookActivity';
 import SignUpModal from './components/SignUpModal';
@@ -37,13 +41,15 @@ function LogModalWrapper({ book, onClose }: { book: Book, onClose: () => void })
 function App() {
   const { user, isLoading: authLoading } = useAuth();
   const isLoggedIn = !!user;
-  const [currentPage, setCurrentPage] = useState('home');
-  const [previousPage, setPreviousPage] = useState('home');
-
+  const routerNavigate = useNavigate();
+  const location = useLocation();
+  
+  // Custom navigation wrapper to support legacy 'home' string passed by Header/Sidebar
   const navigate = (page: string) => {
-    if (page !== currentPage) {
-      setPreviousPage(currentPage);
-      setCurrentPage(page);
+    if (page === 'home') {
+      routerNavigate('/');
+    } else {
+      routerNavigate(`/${page}`);
     }
   };
   const [isLogActionModalOpen, setIsLogActionModalOpen] = useState(false);
@@ -53,7 +59,6 @@ function App() {
   const [isLoading, setIsLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [displayedQuery, setDisplayedQuery] = useState('');
-  const [selectedBook, setSelectedBook] = useState<Book | null>(null);
   const [selectedBookToLog, setSelectedBookToLog] = useState<Book | null>(null);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [authModalType, setAuthModalType] = useState<'register' | 'login'>('register');
@@ -78,43 +83,32 @@ function App() {
     if (!searchQuery.trim()) return;
 
     setDisplayedQuery(searchQuery);
-    setCurrentPage('results');
+    navigate('results');
+  };
+
+  const handleBookSelect = (book: Book) => {
+    const id = book.key ? book.key.replace('/works/', '') : book.id;
+    routerNavigate(`/fic/${id}`, { state: { book } });
   };
 
   const renderPage = () => {
-    switch (currentPage) {
-      case 'home':
-        return (
-          <Home
-            isLoading={isLoading}
-            books={books}
-            setSelectedBook={(book) => { setSelectedBook(book); navigate('fic'); }}
-          />
-        );
-      case 'results':
-        return (
-          <Results
-            searchQuery={displayedQuery}
-            onBookSelect={(book) => { setSelectedBook(book); navigate('fic'); }}
-          />
-        );
-      case 'bookmarks':
-        return <Bookmarks onBookSelect={(book) => { setSelectedBook(book); navigate('fic'); }} />;
-      case 'readlist':
-        return <Readlist onBookSelect={(book) => { setSelectedBook(book); navigate('fic'); }} />;
-      case 'journal':
-        return <Journal onBookSelect={(book) => { setSelectedBook(book); navigate('fic'); }} />;
-      case 'activity':
-        return <Activity onBookSelect={(book) => { setSelectedBook(book); navigate('fic'); }} />;
-      case 'profile':
-        return <Profile onBookSelect={(book) => { setSelectedBook(book); navigate('fic'); }} />;
-      case 'fic':
-        return selectedBook ? (
-          <Fic book={selectedBook} onBack={() => { navigate(previousPage); setSelectedBook(null); }} />
-        ) : null;
-      default:
-        return null;
-    }
+    return (
+      <Routes>
+        <Route path="/" element={<Home isLoading={isLoading} books={books} setSelectedBook={handleBookSelect} />} />
+        <Route path="/results" element={<Results searchQuery={displayedQuery} onBookSelect={handleBookSelect} />} />
+        <Route path="/bookmarks" element={<Bookmarks onBookSelect={handleBookSelect} />} />
+        <Route path="/readlist" element={<Readlist onBookSelect={handleBookSelect} />} />
+        <Route path="/journal" element={<Journal onBookSelect={handleBookSelect} />} />
+        <Route path="/activity" element={<Activity onBookSelect={handleBookSelect} />} />
+        <Route path="/profile/:username" element={<Profile onBookSelect={handleBookSelect} />} />
+        
+        <Route path="/popular" element={<Popular onBookSelect={handleBookSelect} />} />
+        <Route path="/recently-added" element={<RecentlyAdded onBookSelect={handleBookSelect} />} />
+        <Route path="/all-time-best" element={<AllTimeBest onBookSelect={handleBookSelect} />} />
+        
+        <Route path="/fic/:id" element={<Fic />} />
+      </Routes>
+    );
   };
 
   if (authLoading) {
@@ -166,7 +160,7 @@ function App() {
             {renderPage()}
           </div>
 
-          <Sidebar isLoading={isLoading} setCurrentPage={navigate} onBookSelect={(book) => { setSelectedBook(book); navigate('fic'); }} />
+          <Sidebar isLoading={isLoading} setCurrentPage={navigate} onBookSelect={handleBookSelect} />
         </main>
       )}
 
@@ -195,8 +189,8 @@ function App() {
         <AddFicModal
           onClose={() => setIsAddFicModalOpen(false)}
           onSuccess={(book) => {
-            setSelectedBook(book);
-            setCurrentPage('fic');
+            const id = book.key ? book.key.replace('/works/', '') : book.id;
+            routerNavigate(`/fic/${id}`, { state: { book } });
           }}
         />
       )}

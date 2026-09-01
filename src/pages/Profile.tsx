@@ -1,17 +1,20 @@
 import { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 import { getRelativeTimeStrict } from '../utils/timeFormat';
 import { Book } from '../components/BookCard';
 import { StarIcon as StarSolid } from '@heroicons/react/24/solid';
 import { useAuth } from '../context/AuthContext';
 import { getUserActivityFeed } from '../services/dbService';
 import { supabase } from '../services/supabase';
+import SEO from '../components/SEO';
 
 interface ProfileProps {
   onBookSelect?: (book: Book) => void;
 }
 
 export default function Profile({ onBookSelect }: ProfileProps) {
-  const { user, username, signOut } = useAuth();
+  const { user, username: authUsername, signOut } = useAuth();
+  const { username } = useParams<{ username: string }>();
   const [recentActivity, setRecentActivity] = useState<any[]>([]);
   const [stats, setStats] = useState({ reads: 0, bookmarks: 0, readlist: 0 });
 
@@ -38,10 +41,25 @@ export default function Profile({ onBookSelect }: ProfileProps) {
     fetchProfileData();
   }, [user]);
 
-  const avatarLetter = username.charAt(0).toUpperCase();
+  if (!user || username !== authUsername) {
+    return (
+      <div className="page-container" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh', flexDirection: 'column', gap: '20px' }}>
+        <SEO title="Profile Not Found" description="This profile does not exist or is private." />
+        <div className="inter-bold" style={{ fontSize: '24px', color: 'var(--color-dark)' }}>
+          Profile not found or access denied.
+        </div>
+        <div className="inter-regular" style={{ color: 'var(--color-gray)' }}>
+          Profiles are currently private on myArkived.
+        </div>
+      </div>
+    );
+  }
+
+  const avatarLetter = authUsername.charAt(0).toUpperCase();
 
   return (
     <div className="page-container">
+      <SEO title={`${username}'s Profile`} description={`Check out ${username}'s favorite reads, recent activity, and bookmarks on myArkived.`} />
       <div className="profile-header-expanded" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', position: 'relative' }}>
         <button
           onClick={signOut}
@@ -56,7 +74,7 @@ export default function Profile({ onBookSelect }: ProfileProps) {
           Logout
         </button>
         <div className="avatar inter-bold profile-avatar-large">{avatarLetter}</div>
-        <h2 className="rakkas-regular profile-name-large">{username}</h2>
+        <h2 className="rakkas-regular profile-name-large">{authUsername}</h2>
       </div>
 
       <div className="stats-row profile-stats-row">

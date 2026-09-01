@@ -3,6 +3,7 @@ import BookCard, { Book } from '../components/BookCard';
 import Pagination from '../components/Pagination';
 import { useAuth } from '../context/AuthContext';
 import { getUserReadlist } from '../services/dbService';
+import SEO from '../components/SEO';
 
 interface ReadlistProps {
   onBookSelect?: (book: Book) => void;
@@ -33,7 +34,8 @@ export default function Readlist({ onBookSelect }: ReadlistProps) {
   }, [books.length, totalPages, currentPage]);
 
   return (
-    <div className="page-container">
+    <div style={{ paddingBottom: '40px' }}>
+      <SEO title="Readlist" description="Fanfictions you plan to read later." />
       <div className="page-header-container">
         <h2 className="rakkas-regular page-title">
           My Readlist
